@@ -1,0 +1,6 @@
+CardNumber,CustomerName,Email,Phone,Points,BogoEnabled
+LOYAL001,John Smith,john@email.com,+1234567890,500,true
+LOYAL002,Jane Doe,jane@email.com,+1234567891,250,true
+LOYAL003,Bob Wilson,bob@email.com,+1234567892,100,false
+LOYAL004,Alice Brown,alice@email.com,+1234567893,750,true
+LOYAL005,Charlie Davis,charlie@email.com,+1234567894,0,false
