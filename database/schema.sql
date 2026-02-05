@@ -27,33 +27,34 @@ CREATE TABLE IF NOT EXISTS products (
 ) ENGINE=InnoDB;
 
 -- =====================================================
--- LOYALTY PROGRAMS TABLE (BOGO)
+-- LOYALTY PROGRAMS TABLE (Unified: DISCOUNT + BUY_X_GET_Y)
+-- type 0 = DISCOUNT (percentage discount on reward products)
+-- type 1 = BUY_X_GET_Y (buy trigger products, get reward products free)
+-- trigger_product_ids: comma-separated barcodes that activate the loyalty
+-- reward_product_ids: comma-separated barcodes that receive the reward
 -- =====================================================
 CREATE TABLE IF NOT EXISTS loyalty_programs (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
-    type ENUM('BOGO', 'DISCOUNT', 'POINTS') NOT NULL DEFAULT 'BOGO',
-    buy_quantity INT NOT NULL DEFAULT 1,
-    free_quantity INT NOT NULL DEFAULT 1,
-    discount_percent DECIMAL(5, 2) DEFAULT 0.00,
-    product_barcode VARCHAR(50),
-    category VARCHAR(100),
+    type INT NOT NULL DEFAULT 0 COMMENT '0=DISCOUNT, 1=BUY_X_GET_Y',
+    trigger_product_ids VARCHAR(1000) COMMENT 'Comma-separated barcodes of trigger products',
+    reward_product_ids VARCHAR(1000) COMMENT 'Comma-separated barcodes of reward products',
+    min_quantity INT NOT NULL DEFAULT 1 COMMENT 'Min qty of trigger product to activate',
+    reward_quantity INT NOT NULL DEFAULT 1 COMMENT 'Number of reward items per activation',
+    discount_percent DECIMAL(5, 2) DEFAULT 0.00 COMMENT 'Discount % for type=0',
+    active BOOLEAN NOT NULL DEFAULT TRUE,
     start_date DATETIME NOT NULL,
     end_date DATETIME NOT NULL,
-    active BOOLEAN NOT NULL DEFAULT TRUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     
-    INDEX idx_type (type),
-    INDEX idx_active_dates (active, start_date, end_date),
-    INDEX idx_product_barcode (product_barcode),
-    INDEX idx_category (category),
-    
-    FOREIGN KEY (product_barcode) REFERENCES products(barcode) ON DELETE SET NULL
+    INDEX idx_loyalty_type (type),
+    INDEX idx_loyalty_active (active),
+    INDEX idx_loyalty_dates (active, start_date, end_date)
 ) ENGINE=InnoDB;
 
 -- =====================================================
--- PROMOTIONS TABLE
+-- PROMOTIONS TABLE (kept for backward compatibility, not used by new loyalty logic)
 -- =====================================================
 CREATE TABLE IF NOT EXISTS promotions (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
@@ -173,15 +174,18 @@ INSERT INTO products (barcode, name, description, price, stock, category, tax_ra
 ('3002', 'Turkey Wrap', 'Turkey and veggie wrap', 7.00, 30, 'Food', 0.0800),
 ('3003', 'Caesar Salad', 'Fresh caesar salad', 8.00, 20, 'Food', 0.0800);
 
--- Insert sample loyalty programs
-INSERT INTO loyalty_programs (name, type, buy_quantity, free_quantity, discount_percent, product_barcode, category, start_date, end_date) VALUES
-('Buy 2 Get 1 Free Coffee', 'BOGO', 2, 1, 0, NULL, 'Beverages', '2024-01-01 00:00:00', '2025-12-31 23:59:59'),
-('Buy 3 Get 1 Free Bakery', 'BOGO', 3, 1, 0, NULL, 'Bakery', '2024-01-01 00:00:00', '2025-12-31 23:59:59');
+-- Insert sample loyalty programs (new format)
+-- Type 0 = DISCOUNT: Buy Espresso, get 10% off Croissant
+INSERT INTO loyalty_programs (name, type, trigger_product_ids, reward_product_ids, min_quantity, reward_quantity, discount_percent, active, start_date, end_date) VALUES
+('Buy Espresso Get 10% Off Croissant', 0, '1001', '2001', 1, 1, 10.00, TRUE, '2024-01-01 00:00:00', '2026-12-31 23:59:59');
 
--- Insert sample promotions
-INSERT INTO promotions (name, description, discount_type, discount_value, product_barcode, category, start_date, end_date) VALUES
-('10% Off Food', '10% discount on all food items', 'PERCENTAGE', 10.00, NULL, 'Food', '2024-01-01 00:00:00', '2025-12-31 23:59:59'),
-('$0.50 Off Croissant', 'Special discount on croissants', 'FIXED_AMOUNT', 0.50, '2001', NULL, '2024-01-01 00:00:00', '2025-12-31 23:59:59');
+-- Type 1 = BUY_X_GET_Y: Buy 2 Lattes, get 1 Muffin free
+INSERT INTO loyalty_programs (name, type, trigger_product_ids, reward_product_ids, min_quantity, reward_quantity, discount_percent, active, start_date, end_date) VALUES
+('Buy 2 Lattes Get Free Muffin', 1, '1003', '2002', 2, 1, 0.00, TRUE, '2024-01-01 00:00:00', '2026-12-31 23:59:59');
+
+-- Multiple triggers/rewards: Buy any coffee (1001,1002,1003), get any bakery item (2001,2002,2003) at 15% off
+INSERT INTO loyalty_programs (name, type, trigger_product_ids, reward_product_ids, min_quantity, reward_quantity, discount_percent, active, start_date, end_date) VALUES
+('Coffee + Bakery 15% Off', 0, '1001,1002,1003', '2001,2002,2003', 1, 1, 15.00, TRUE, '2024-01-01 00:00:00', '2026-12-31 23:59:59');
 
 -- =====================================================
 -- USEFUL VIEWS
@@ -203,73 +207,22 @@ WHERE o.status = 'COMPLETED'
 GROUP BY DATE(o.created_at)
 ORDER BY sale_date DESC;
 
--- View: Product Sales Summary
-CREATE OR REPLACE VIEW v_product_sales AS
-SELECT 
-    p.barcode,
-    p.name AS product_name,
-    p.category,
-    COUNT(oi.id) AS times_sold,
-    SUM(oi.quantity) AS total_quantity_sold,
-    SUM(oi.subtotal) AS gross_revenue,
-    SUM(oi.discount_amount) AS total_discounts,
-    SUM(oi.total_amount) AS net_revenue
-FROM products p
-LEFT JOIN order_items oi ON p.id = oi.product_id
-LEFT JOIN orders o ON oi.order_id = o.id AND o.status = 'COMPLETED'
-GROUP BY p.id, p.barcode, p.name, p.category
-ORDER BY total_quantity_sold DESC;
-
--- View: Active Promotions
-CREATE OR REPLACE VIEW v_active_promotions AS
-SELECT 
-    id,
-    name,
-    discount_type,
-    discount_value,
-    product_barcode,
-    category,
-    start_date,
-    end_date
-FROM promotions
-WHERE active = TRUE 
-    AND NOW() BETWEEN start_date AND end_date;
-
 -- View: Active Loyalty Programs
 CREATE OR REPLACE VIEW v_active_loyalty AS
 SELECT 
     id,
     name,
     type,
-    buy_quantity,
-    free_quantity,
+    trigger_product_ids,
+    reward_product_ids,
+    min_quantity,
+    reward_quantity,
     discount_percent,
-    product_barcode,
-    category,
     start_date,
     end_date
 FROM loyalty_programs
 WHERE active = TRUE 
     AND NOW() BETWEEN start_date AND end_date;
-
--- View: Session Summary
-CREATE OR REPLACE VIEW v_session_summary AS
-SELECT 
-    s.id AS session_id,
-    s.cashier_name,
-    s.status,
-    s.opened_at,
-    s.closed_at,
-    s.opening_cash,
-    s.closing_cash,
-    COUNT(o.id) AS order_count,
-    COALESCE(SUM(o.total_amount), 0) AS total_sales,
-    COALESCE(SUM(CASE WHEN o.payment_method = 'CASH' THEN o.total_amount ELSE 0 END), 0) AS cash_total,
-    COALESCE(SUM(CASE WHEN o.payment_method = 'CARD' THEN o.total_amount ELSE 0 END), 0) AS card_total
-FROM pos_sessions s
-LEFT JOIN orders o ON s.id = o.session_id AND o.status = 'COMPLETED'
-GROUP BY s.id, s.cashier_name, s.status, s.opened_at, s.closed_at, s.opening_cash, s.closing_cash
-ORDER BY s.opened_at DESC;
 
 -- =====================================================
 -- STORED PROCEDURES
@@ -287,7 +240,6 @@ BEGIN
     DECLARE v_total_sales DECIMAL(12,2);
     DECLARE v_transaction_count INT;
     
-    -- Calculate totals
     SELECT 
         COALESCE(SUM(total_amount), 0),
         COUNT(*)
@@ -295,7 +247,6 @@ BEGIN
     FROM orders 
     WHERE session_id = p_session_id AND status = 'COMPLETED';
     
-    -- Update session
     UPDATE pos_sessions
     SET 
         status = 'CLOSED',
@@ -307,23 +258,9 @@ BEGIN
     WHERE id = p_session_id AND status = 'OPEN';
 END //
 
--- Procedure: Generate Order Number
-CREATE FUNCTION fn_generate_order_number()
-RETURNS VARCHAR(50)
-DETERMINISTIC
-BEGIN
-    DECLARE order_num VARCHAR(50);
-    SET order_num = CONCAT('ORD-', DATE_FORMAT(NOW(), '%Y%m%d'), '-', LPAD(FLOOR(RAND() * 10000), 4, '0'));
-    RETURN order_num;
-END //
-
 DELIMITER ;
 
--- =====================================================
--- INDEXES FOR PERFORMANCE
--- =====================================================
-
--- Additional composite indexes for common queries
+-- Additional indexes
 CREATE INDEX idx_orders_session_status ON orders(session_id, status);
 CREATE INDEX idx_order_items_order_product ON order_items(order_id, product_id);
 CREATE INDEX idx_products_category_active ON products(category, active);

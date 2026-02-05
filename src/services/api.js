@@ -25,7 +25,7 @@ export const productApi = {
   },
 };
 
-// Loyalty API
+// Loyalty API (unified: type 0=DISCOUNT, type 1=BUY_X_GET_Y)
 export const loyaltyApi = {
   getAll: () => api.get('/loyalty'),
   getActive: () => api.get('/loyalty/active'),
@@ -41,7 +41,7 @@ export const loyaltyApi = {
   },
 };
 
-// Promotions API
+// Promotions API (kept for backward compatibility)
 export const promotionApi = {
   getAll: () => api.get('/promotions'),
   getActive: () => api.get('/promotions/active'),
