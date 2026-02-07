@@ -56,7 +56,7 @@ const styles = {
   },
   paymentBtnHover: {
     borderColor: '#e94560',
-    background: 'rgba(233, 69, 96, 0.1)',
+    background: '#fff',
   },
   paymentIcon: {
     fontSize: '40px',
@@ -77,7 +77,7 @@ const styles = {
     transition: 'all 0.3s',
   },
   summary: {
-    background: 'rgba(255,255,255,0.05)',
+    background: '#fff',
     borderRadius: '10px',
     padding: '15px',
     marginBottom: '20px',
@@ -90,7 +90,7 @@ const styles = {
   },
   divider: {
     height: '1px',
-    background: 'rgba(255,255,255,0.2)',
+    background: '#fff',
     margin: '10px 0',
   },
 };
@@ -140,7 +140,7 @@ const PaymentModal = ({ totals, onPayment, onCancel, loading }) => {
             onMouseLeave={() => setHoveredBtn(null)}
             disabled={loading}
           >
-            <span style={styles.paymentIcon}>💵</span>
+            <span style={styles.paymentIcon}></span>
             <span style={styles.paymentLabel}>Cash</span>
           </button>
 
@@ -154,7 +154,7 @@ const PaymentModal = ({ totals, onPayment, onCancel, loading }) => {
             onMouseLeave={() => setHoveredBtn(null)}
             disabled={loading}
           >
-            <span style={styles.paymentIcon}>💳</span>
+            <span style={styles.paymentIcon}></span>
             <span style={styles.paymentLabel}>Card</span>
           </button>
         </div>

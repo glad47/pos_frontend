@@ -227,8 +227,8 @@ const Cart = ({
                         style={promo.type === 'BOGO' ? styles.freeTag : styles.promoTag}
                       >
                         {promo.type === 'BOGO'
-                          ? `🎁 ${promo.freeItems} FREE`
-                          : `💰 ${promo.name}`}
+                          ? ` ${promo.freeItems} FREE`
+                          : ` ${promo.name}`}
                       </span>
                     ))}
                   </div>

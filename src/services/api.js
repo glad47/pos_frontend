@@ -1,22 +1,21 @@
 import axios from 'axios';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080/api';
+const API_URL = 'http://localhost:8080/api';
 
 const api = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: API_URL,
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
-// Products API
 export const productApi = {
   getAll: () => api.get('/products'),
   getByBarcode: (barcode) => api.get(`/products/barcode/${barcode}`),
   create: (product) => api.post('/products', product),
   update: (id, product) => api.put(`/products/${id}`, product),
   delete: (id) => api.delete(`/products/${id}`),
-  import: (file) => {
+  importExcel: (file) => {
     const formData = new FormData();
     formData.append('file', file);
     return api.post('/products/import', formData, {
@@ -25,14 +24,13 @@ export const productApi = {
   },
 };
 
-// Loyalty API (unified: type 0=DISCOUNT, type 1=BUY_X_GET_Y)
 export const loyaltyApi = {
   getAll: () => api.get('/loyalty'),
   getActive: () => api.get('/loyalty/active'),
   create: (loyalty) => api.post('/loyalty', loyalty),
   update: (id, loyalty) => api.put(`/loyalty/${id}`, loyalty),
   delete: (id) => api.delete(`/loyalty/${id}`),
-  import: (file) => {
+  importExcel: (file) => {
     const formData = new FormData();
     formData.append('file', file);
     return api.post('/loyalty/import', formData, {
@@ -41,32 +39,37 @@ export const loyaltyApi = {
   },
 };
 
-// Promotions API (kept for backward compatibility)
-export const promotionApi = {
-  getAll: () => api.get('/promotions'),
-  getActive: () => api.get('/promotions/active'),
-  create: (promotion) => api.post('/promotions', promotion),
-  update: (id, promotion) => api.put(`/promotions/${id}`, promotion),
-  delete: (id) => api.delete(`/promotions/${id}`),
-};
-
-// Sessions API
 export const sessionApi = {
-  getAll: () => api.get('/sessions'),
-  getOpen: () => api.get('/sessions/open'),
-  getById: (id) => api.get(`/sessions/${id}`),
-  getByCashier: (cashierName) => api.get(`/sessions/cashier/${cashierName}`),
+  // Open session (will return existing active session if found)
   open: (data) => api.post('/sessions/open', data),
-  close: (id, data) => api.post(`/sessions/${id}/close`, data),
+  
+  // Close session
+  close: (sessionId, data) => api.post(`/sessions/${sessionId}/close`, data),
+  
+  // Get current session (deprecated - use checkActiveSession instead)
+  getCurrent: () => api.get('/sessions/current'),
+  
+  // Get session by ID
+  getById: (sessionId) => api.get(`/sessions/${sessionId}`),
+  
+  // Check if cashier has active session
+  checkActiveSession: (cashierName) => api.get(`/sessions/check/${encodeURIComponent(cashierName)}`),
+  
+  // Get active session for cashier
+  getActiveSession: (cashierName) => api.get(`/sessions/active/${encodeURIComponent(cashierName)}`),
+  
+  // Get all open sessions
+  getOpenSessions: () => api.get('/sessions/open'),
 };
 
-// Orders API
 export const orderApi = {
-  getAll: () => api.get('/orders'),
-  getById: (id) => api.get(`/orders/${id}`),
+  create: (sessionId, orderData) => api.post(`/orders/session/${sessionId}`, orderData),
+  getSessionOrders: (sessionId) => api.get(`/orders/session/${sessionId}`),
   getByNumber: (orderNumber) => api.get(`/orders/number/${orderNumber}`),
-  getBySession: (sessionId) => api.get(`/orders/session/${sessionId}`),
-  create: (order) => api.post('/orders', order),
+  search: (searchDTO) => api.post('/orders/search', searchDTO),
+  updateSyncStatus: (orderId, synced) => api.put(`/orders/${orderId}/sync?synced=${synced}`),
+  getUnsyncedOrders: () => api.get('/orders/unsynced'),
+  getOrderJson: (orderId) => api.get(`/orders/${orderId}/json`),
 };
 
 export default api;
