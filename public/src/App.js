@@ -489,7 +489,6 @@ function App() {
       const [prodRes, loyRes] = await Promise.all([productApi.getAll(), loyaltyApi.getActive()]);
       setProducts(Array.isArray(prodRes.data) ? prodRes.data : []);
       setLoyalties(Array.isArray(loyRes.data) ? loyRes.data : (loyRes.data?.data || []));
-      console.log('[POS] Loaded loyalties:', JSON.stringify(loyRes.data, null, 2));
       showMessage('Data refreshed successfully');
     } catch (error) { 
       console.error('Error loading data:', error);
@@ -703,9 +702,7 @@ const openCustomerDisplay = () => {
                 
                 if (sec.triggerItems) {
                   sec.triggerItems.forEach(ti => {
-                    var displayName = ti.loyaltyLabel || ti.name;
-                    var displayTotal = ti.afterDiscountPrice ? fc(ti.afterDiscountPrice * ti.quantity) : fc(ti.lineTotal);
-                    html += '<div class="line-item"><span>' + displayName + ' x ' + ti.quantity + '</span><span>' + displayTotal + '</span></div>';
+                    html += '<div class="line-item"><span>' + ti.name + ' x ' + ti.quantity + '</span><span>' + fc(ti.lineTotal) + '</span></div>';
                   });
                 }
                 
@@ -716,7 +713,7 @@ const openCustomerDisplay = () => {
                   });
                 }
                 
-                if (sec.type === 0 && sec.totalDiscount > 0 && !sec.afterDiscount) {
+                if (sec.type === 0 && sec.totalDiscount > 0) {
                   html += '<div class="discount-line" style="color:#28a745;font-weight:bold"><span>💚 Discount</span><span>' + fcNeg(sec.totalDiscount) + '</span></div>';
                 }
                 
@@ -822,38 +819,16 @@ const updateCustomerDisplay = () => {
     cartItems.forEach(item => { cartMap[item.barcode] = item; });
     const triggerGroups = {};
 
-    // Build product ID → barcode map
-    const idToBarcode = {};
-    products.forEach(p => { if (p.id != null) idToBarcode[String(p.id)] = p.barcode; });
-    const resolveIds = (idStr) => (idStr || '').split(',').map(s => s.trim()).filter(Boolean).map(id => idToBarcode[id] || id);
-
-    // Normalize loyalty fields to handle both snake_case and camelCase
-    const normD = (l) => ({
-      ...l,
-      triggerProductIds: l.triggerProductIds || l.trigger_product_ids || '',
-      rewardProductIds: l.rewardProductIds || l.reward_product_ids || '',
-      minQuantity: parseInt(l.minQuantity ?? l.min_quantity ?? l.minquantity) || 1,
-      maxQuantity: parseInt(l.maxQuantity ?? l.max_quantity ?? l.maxquantity) || 0,
-      rewardQuantity: parseInt(l.rewardQuantity ?? l.reward_quantity ?? l.rewardquantity) || 1,
-    });
-
-    loyalties.forEach(rawLoyalty => {
-      if (!rawLoyalty.active || rawLoyalty.type !== 1) return;
-      const loyalty = normD(rawLoyalty);
-      const triggerBarcodes = resolveIds(loyalty.triggerProductIds);
-      const rewardBarcodes = resolveIds(loyalty.rewardProductIds);
+    loyalties.forEach(loyalty => {
+      if (!loyalty.active || loyalty.type !== 1) return;
+      const triggerBarcodes = (loyalty.triggerProductIds || '').split(',').map(s => s.trim()).filter(Boolean);
+      const rewardBarcodes = (loyalty.rewardProductIds || '').split(',').map(s => s.trim()).filter(Boolean);
       if (!triggerBarcodes.length || !rewardBarcodes.length) return;
-      const minQty = loyalty.minQuantity;
-      const rewardQtyPerSet = loyalty.rewardQuantity;
+      const minQty = loyalty.minQuantity || 1;
 
       let activeTrigger = null;
       for (const tb of triggerBarcodes) {
-        if (!cartMap[tb]) continue;
-        const qty = cartMap[tb].quantity;
-        // If trigger and reward are same product, need minQty + rewardQty total
-        const isSameProd = rewardBarcodes.includes(tb);
-        const requiredQty = isSameProd ? (minQty + rewardQtyPerSet) : minQty;
-        if (qty >= requiredQty) { activeTrigger = tb; break; }
+        if (cartMap[tb] && cartMap[tb].quantity >= minQty) { activeTrigger = tb; break; }
       }
       if (!activeTrigger) return;
 
@@ -869,11 +844,10 @@ const updateCustomerDisplay = () => {
       if (programs.length > 1) {
         const triggerProduct = cartMap[triggerBarcode];
         const options = programs.map(p => {
-          const nl = normD(p.loyalty);
-          const rewardQtyPerSet = nl.rewardQuantity;
+          const rewardQtyPerSet = p.loyalty.rewardQuantity || 1;
           const potentialSavings = p.rewardsInCart.reduce((sum, rb) => sum + (cartMap[rb].price * rewardQtyPerSet), 0);
           return {
-            loyaltyId: nl.id || nl.name, loyaltyName: nl.name, type: nl.type, discountPercent: 0,
+            loyaltyId: p.loyalty.id || p.loyalty.name, loyaltyName: p.loyalty.name, type: p.loyalty.type, discountPercent: 0,
             rewardProducts: p.rewardsInCart.map(rb => ({ barcode: rb, name: cartMap[rb].name, price: cartMap[rb].price })),
             potentialSavings: potentialSavings
           };
@@ -882,7 +856,7 @@ const updateCustomerDisplay = () => {
       }
     });
     return conflicts;
-  }, [loyalties, products]);
+  }, [loyalties]);
 
   useEffect(() => {
     if (cart.length === 0) { setLoyaltySelections({}); setShowConflictModal(null); return; }
@@ -935,29 +909,9 @@ const updateCustomerDisplay = () => {
     const bogoRewardedBarcodes = new Set();
     const currentSel = selectionsRef.current;
 
-    // Build product ID → barcode map so loyalty product IDs resolve to cart barcodes
-    const idToBarcode = {};
-    products.forEach(p => { if (p.id != null) idToBarcode[String(p.id)] = p.barcode; });
-    // Helper: resolve a list of product IDs to barcodes
-    const resolveIds = (idStr) => (idStr || '').split(',').map(s => s.trim()).filter(Boolean).map(id => idToBarcode[id] || id);
-
-    // Normalize loyalty fields to handle both snake_case and camelCase from backend
-    const norm = (l) => ({
-      ...l,
-      triggerProductIds: l.triggerProductIds || l.trigger_product_ids || '',
-      rewardProductIds: l.rewardProductIds || l.reward_product_ids || '',
-      minQuantity: parseInt(l.minQuantity ?? l.min_quantity ?? l.minquantity) || 1,
-      maxQuantity: parseInt(l.maxQuantity ?? l.max_quantity ?? l.maxquantity) || 0,
-      rewardQuantity: parseInt(l.rewardQuantity ?? l.reward_quantity ?? l.rewardquantity) || 1,
-      discountAmount: parseFloat(l.discountAmount ?? l.discount_amount) || 0,
-      afterDiscount: parseFloat(l.afterDiscount ?? l.after_discount) || 0,
-      discountPercent: parseFloat(l.discountPercent ?? l.discount_percent) || 0,
-    });
-
     const activeLoyalties = loyalties.filter(loyalty => {
       if (!loyalty.active) return false;
-      const n = norm(loyalty);
-      const triggerBarcodes = resolveIds(n.triggerProductIds);
+      const triggerBarcodes = (loyalty.triggerProductIds || '').split(',').map(s => s.trim()).filter(Boolean);
       for (const tb of triggerBarcodes) {
         if (currentSel[tb]) {
           const loyaltyId = loyalty.id || loyalty.name;
@@ -971,38 +925,22 @@ const updateCustomerDisplay = () => {
     const sections = [];
     const consumed = {}; // tracks consumed qty per barcode
 
-    sorted.forEach(rawLoyalty => {
-      const loyalty = norm(rawLoyalty);
-      const triggerBarcodes = resolveIds(loyalty.triggerProductIds);
-      let rewardBarcodes = resolveIds(loyalty.rewardProductIds);
-      if (!triggerBarcodes.length) return;
-      
-      console.log(`[Loyalty ${loyalty.id}] "${loyalty.name}" type=${loyalty.type} trigger=[${triggerBarcodes}] reward=[${rewardBarcodes}] minQty=${loyalty.minQuantity} maxQty=${loyalty.maxQuantity} discountAmt=${loyalty.discountAmount} afterDiscount=${loyalty.afterDiscount}`);
-      
-      // For type 0 fixed discount, rewardBarcodes are not needed (discount applies to trigger group)
-      // So allow empty rewardBarcodes for this case by using triggerBarcodes as fallback
-      const fixedDiscount = loyalty.discountAmount;
-      const afterDiscount = loyalty.afterDiscount;
-      const isFixedDiscount = fixedDiscount > 0 || afterDiscount > 0;
-      
-      if (loyalty.type === 0 && isFixedDiscount) {
-        // rewardBarcodes not needed for fixed discount, use trigger as fallback
-        if (!rewardBarcodes.length) rewardBarcodes = [...triggerBarcodes];
-      } else {
-        // For other types, both trigger and reward are required
-        if (!rewardBarcodes.length) return;
-      }
+    sorted.forEach(loyalty => {
+      const triggerBarcodes = (loyalty.triggerProductIds || '').split(',').map(s => s.trim()).filter(Boolean);
+      const rewardBarcodes = (loyalty.rewardProductIds || '').split(',').map(s => s.trim()).filter(Boolean);
+      if (!triggerBarcodes.length || !rewardBarcodes.length) return;
 
-      const minQty = loyalty.minQuantity;
-      const maxQty = loyalty.maxQuantity;
+      const minQty = loyalty.minQuantity || 1;
+      const maxQty = loyalty.maxQuantity || 0;
+      const fixedDiscount = parseFloat(loyalty.discountAmount) || 0;
+      const afterDiscount = parseFloat(loyalty.afterDiscount) || 0;
+      const isFixedDiscount = fixedDiscount > 0 || afterDiscount > 0;
 
       // ====== TYPE 0: DISCOUNT (fixed-amount or percentage) ======
       if (loyalty.type === 0 && isFixedDiscount) {
-        // FIXED DISCOUNT: eligible products form groups of exactly minQty.
-        // Only minQty items per set get the discounted price.
-        // maxQty limits how many sets can be formed.
-        // Items beyond (maxQty * minQty) remain at normal price.
-        // rewardQuantity is NOT used for this type.
+        // FIXED DISCOUNT (CSV-style): eligible products form a single group.
+        // Sum up available quantities from ALL eligible barcodes in cart.
+        // If total >= minQty, we have a set. The discount for the set is fixedDiscount.
         
         // Collect available items from the eligible group
         const eligibleInCart = [];
@@ -1019,15 +957,12 @@ const updateCustomerDisplay = () => {
         const totalAvailable = eligibleInCart.reduce((sum, e) => sum + e.available, 0);
         if (totalAvailable < minQty) return;
         
-        // How many complete sets of minQty can we make?
+        // How many sets can we make?
         let maxPossibleSets = Math.floor(totalAvailable / minQty);
-        // maxQty limits the number of sets (0 = unlimited)
         let actualSets = maxQty === 0 ? maxPossibleSets : Math.min(maxPossibleSets, maxQty);
         if (actualSets <= 0) return;
         
-        // Only consume exactly actualSets * minQty items (the rest stay at normal price)
-        const totalItemsConsumed = actualSets * minQty;
-        let totalItemsNeeded = totalItemsConsumed;
+        let totalItemsNeeded = actualSets * minQty;
         const sectionTriggerItems = [];
         const sectionRewardItems = [];
         let sectionGross = 0;
@@ -1041,20 +976,18 @@ const updateCustomerDisplay = () => {
           
           sectionTriggerItems.push({
             barcode: e.barcode, name: e.name, price: e.price,
-            quantity: take, lineTotal: lineTotal,
-            // Store after-discount info for display: show promotion name and new price
-            afterDiscountPrice: afterDiscount > 0 ? afterDiscount : null,
-            loyaltyLabel: afterDiscount > 0 ? loyalty.name : null,
+            quantity: take, lineTotal: lineTotal
           });
           
           consumed[e.barcode] = (consumed[e.barcode] || 0) + take;
           totalItemsNeeded -= take;
         }
         
-        // Calculate discount: afterDiscount is PER ITEM, not per set
-        // New total = afterDiscount * totalItemsConsumed
-        const newTotal = afterDiscount > 0 ? afterDiscount * totalItemsConsumed : sectionGross - (fixedDiscount * actualSets);
-        const totalDiscountAmt = Math.max(0, sectionGross - newTotal);
+        // Calculate discount: if afterDiscount is set, new total = afterDiscount * actualSets
+        // otherwise use fixedDiscount per set
+        const totalDiscountAmt = afterDiscount > 0
+          ? Math.max(0, sectionGross - (afterDiscount * actualSets))
+          : fixedDiscount * actualSets;
         const discountPct = sectionGross > 0 ? Math.round((totalDiscountAmt / sectionGross) * 10000) / 100 : 0;
         
         // For reward display, just reference the same items (discount is on the whole group)
@@ -1073,7 +1006,7 @@ const updateCustomerDisplay = () => {
           loyaltyName: loyalty.name,
           type: 0,
           discountPercent: discountPct,
-          afterDiscount: afterDiscount > 0 ? afterDiscount * totalItemsConsumed : 0,
+          afterDiscount: afterDiscount * actualSets,
           triggerItems: sectionTriggerItems,
           rewardItems: sectionRewardItems,
           sectionSubtotal: sectionGross - totalDiscountAmt,
@@ -1122,78 +1055,40 @@ const updateCustomerDisplay = () => {
         }
         
       } else if (loyalty.type === 1) {
-        // ====== TYPE 1: BUY_X_GET_Y ======
-        // When trigger and reward are the SAME product:
-        //   Need (minQty + rewardQty) items per set. First minQty are paid, next rewardQty are free.
-        //   e.g. "Buy 3 get 1 free" with same product: need 4 items. 3 paid + 1 free.
-        // When trigger and reward are DIFFERENT products:
-        //   Need minQty of trigger product + rewardQty of reward product available.
-        
-        const rewardQtyPerSet = loyalty.rewardQuantity || 1;
-        
+        // ====== TYPE 1: BUY_X_GET_Y (unchanged logic) ======
+        let triggerBarcode = null, triggerAvailable = 0;
         for (const tb of triggerBarcodes) {
-          const triggerItem = cartMap[tb];
-          if (!triggerItem) continue;
-          const triggerAvail = triggerItem.quantity - (consumed[tb] || 0);
-          if (triggerAvail < minQty) continue;
-          
-          for (const rb of rewardBarcodes) {
-            if (bogoRewardedBarcodes.has(rb)) continue;
-            const rewardItem = cartMap[rb];
-            if (!rewardItem) continue;
-            
-            const isSameProduct = (tb === rb);
-            
-            if (isSameProduct) {
-              // Same product: total items needed per set = minQty + rewardQtyPerSet
-              const totalPerSet = minQty + rewardQtyPerSet;
-              const totalAvail = triggerItem.quantity - (consumed[tb] || 0);
-              if (totalAvail < totalPerSet) continue;
-              
-              const maxPossibleSets = Math.floor(totalAvail / totalPerSet);
-              let actualSets = maxQty === 0 ? maxPossibleSets : Math.min(maxPossibleSets, maxQty);
-              if (actualSets <= 0) continue;
-              
-              const triggerQtyUsed = actualSets * minQty;
-              const freeQty = actualSets * rewardQtyPerSet;
-              
-              bogoRewardedBarcodes.add(rb);
-              sections.push({
-                loyaltyId: loyalty.id || loyalty.name, loyaltyName: loyalty.name, type: 1, discountPercent: 0,
-                triggerItems: [{ barcode: tb, name: triggerItem.name, price: triggerItem.price, quantity: triggerQtyUsed, lineTotal: triggerItem.price * triggerQtyUsed }],
-                rewardItems: [{ barcode: rb, name: rewardItem.name, price: rewardItem.price, quantity: freeQty, freeQty, discountAmount: freeQty * rewardItem.price, lineTotal: 0 }],
-                sectionSubtotal: triggerItem.price * triggerQtyUsed, totalDiscount: freeQty * rewardItem.price
-              });
-              consumed[tb] = (consumed[tb] || 0) + triggerQtyUsed + freeQty;
-              break;
-              
-            } else {
-              // Different products: trigger and reward are separate pools
-              const availReward = rewardItem.quantity - (consumed[rb] || 0);
-              if (availReward <= 0) continue;
-              
-              const maxSetsFromTrigger = Math.floor(triggerAvail / minQty);
-              const maxSetsFromReward = Math.floor(availReward / rewardQtyPerSet);
-              let maxPossibleSets = Math.min(maxSetsFromTrigger, maxSetsFromReward);
-              let actualSets = maxQty === 0 ? maxPossibleSets : Math.min(maxPossibleSets, maxQty);
-              if (actualSets <= 0) continue;
-              
-              const freeQty = actualSets * rewardQtyPerSet;
-              const triggerQtyUsed = actualSets * minQty;
-              
-              bogoRewardedBarcodes.add(rb);
-              sections.push({
-                loyaltyId: loyalty.id || loyalty.name, loyaltyName: loyalty.name, type: 1, discountPercent: 0,
-                triggerItems: [{ barcode: tb, name: triggerItem.name, price: triggerItem.price, quantity: triggerQtyUsed, lineTotal: triggerItem.price * triggerQtyUsed }],
-                rewardItems: [{ barcode: rb, name: rewardItem.name, price: rewardItem.price, quantity: freeQty, freeQty, discountAmount: freeQty * rewardItem.price, lineTotal: 0 }],
-                sectionSubtotal: triggerItem.price * triggerQtyUsed, totalDiscount: freeQty * rewardItem.price
-              });
-              consumed[tb] = (consumed[tb] || 0) + triggerQtyUsed;
-              consumed[rb] = (consumed[rb] || 0) + freeQty;
-              break;
-            }
-          }
-          break; // Only use first matching trigger barcode
+          const item = cartMap[tb];
+          if (!item) continue;
+          const avail = item.quantity - (consumed[tb] || 0);
+          if (avail >= minQty) { triggerBarcode = tb; triggerAvailable = avail; break; }
+        }
+        if (!triggerBarcode) return;
+        const triggerItem = cartMap[triggerBarcode];
+
+        const rewardQtyPerSet = loyalty.rewardQuantity || 1;
+        for (const rb of rewardBarcodes) {
+          const rewardItem = cartMap[rb];
+          if (!rewardItem) continue;
+          const availReward = rewardItem.quantity - (consumed[rb] || 0);
+          if (availReward <= 0) continue;
+          const maxSetsFromTrigger = Math.floor(triggerAvailable / minQty);
+          const maxSetsFromReward = Math.floor(availReward / rewardQtyPerSet);
+          let maxPossibleSets = Math.min(maxSetsFromTrigger, maxSetsFromReward);
+          let actualSets3 = maxQty === 0 ? maxPossibleSets : Math.min(maxPossibleSets, maxQty);
+          if (actualSets3 <= 0) continue;
+          const freeQty = actualSets3 * rewardQtyPerSet;
+          const triggerQtyUsed = actualSets3 * minQty;
+          bogoRewardedBarcodes.add(rb);
+          sections.push({
+            loyaltyId: loyalty.id || loyalty.name, loyaltyName: loyalty.name, type: 1, discountPercent: 0,
+            triggerItems: [{ barcode: triggerBarcode, name: triggerItem.name, price: triggerItem.price, quantity: triggerQtyUsed, lineTotal: triggerItem.price * triggerQtyUsed }],
+            rewardItems: [{ barcode: rb, name: rewardItem.name, price: rewardItem.price, quantity: freeQty, freeQty, discountAmount: freeQty * rewardItem.price, lineTotal: 0 }],
+            sectionSubtotal: triggerItem.price * triggerQtyUsed, totalDiscount: freeQty * rewardItem.price
+          });
+          consumed[triggerBarcode] = (consumed[triggerBarcode] || 0) + triggerQtyUsed;
+          consumed[rb] = (consumed[rb] || 0) + freeQty;
+          break;
         }
       }
     });
@@ -1206,7 +1101,7 @@ const updateCustomerDisplay = () => {
     });
 
     return { sections, remainingItems };
-  }, [loyalties, products]);
+  }, [loyalties]);
 
   const calculateTotals = useCallback(() => {
     const { sections, remainingItems } = calculateLoyaltyBreakdown(cart);
@@ -1520,8 +1415,7 @@ const updateCustomerDisplay = () => {
                           </div>
                           {sec.triggerItems.map((ti, i) => (
                             <div key={`t${i}`} style={{ display: 'flex', justifyContent: 'space-between', padding: '2px 8px', fontSize: '12px', color: '#333' }}>
-                              <span>{ti.loyaltyLabel || ti.name} x {ti.quantity}</span>
-                              <span>{ti.afterDiscountPrice ? fc(ti.afterDiscountPrice * ti.quantity) : fc(ti.lineTotal)}</span>
+                              <span>{ti.name} x {ti.quantity}</span><span>{fc(ti.lineTotal)}</span>
                             </div>
                           ))}
                           {sec.rewardItems.filter(ri => ri.barcode !== '_group_discount_').map((ri, i) => (
@@ -1529,7 +1423,7 @@ const updateCustomerDisplay = () => {
                               <span>{ri.name} x {ri.quantity}</span><span>{sec.type === 1 ? fc(0) : fc(ri.lineTotal)}</span>
                             </div>
                           ))}
-                          {sec.type === 0 && sec.totalDiscount > 0 && !sec.afterDiscount && (
+                          {sec.type === 0 && sec.totalDiscount > 0 && (
                             <div style={{ display: 'flex', justifyContent: 'space-between', padding: '2px 8px', fontSize: '12px', color: '#28a745', fontWeight: 'bold' }}>
                               <span>💚 Discount</span><span>{fcNeg(sec.totalDiscount)}</span>
                             </div>

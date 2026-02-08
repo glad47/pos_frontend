@@ -1,0 +1,11 @@
+Barcode,Name,Description,Price,CategoryId,StockQuantity
+1234567890123,Coca-Cola 500ml,Refreshing soft drink,2.50,1,100
+1234567890124,Pepsi 500ml,Cola soft drink,2.50,1,100
+1234567890125,Lay's Classic Chips,Potato chips original flavor,3.99,2,50
+1234567890126,Doritos Nacho,Nacho cheese tortilla chips,4.29,2,50
+1234567890127,Snickers Bar,Chocolate peanut bar,1.99,3,200
+1234567890128,Kit Kat,Chocolate wafer bar,1.79,3,200
+1234567890129,Red Bull 250ml,Energy drink,3.99,1,75
+1234567890130,Monster Energy 500ml,Energy drink,4.49,1,75
+1234567890131,Evian Water 1L,Natural mineral water,2.99,1,150
+1234567890132,Pringles Original,Stacked potato crisps,4.99,2,60

@@ -93,18 +93,15 @@ const generateReceiptHTML = (order, companyInfo) => {
       ? 'Buy ' + (sec.triggerItems[0]?.quantity||0) + ' Get ' + (sec.rewardItems[0]?.freeQty||0) + ' Free / اشتر واحصل مجاناً'
       : sec.discountPercent + '% Off / ' + sec.discountPercent + '% خصم';
 
-    const tLines = sec.triggerItems.map(ti => {
-      const displayName = ti.loyaltyLabel || ti.name;
-      const displayTotal = ti.afterDiscountPrice ? ti.afterDiscountPrice * ti.quantity : ti.lineTotal;
-      const displayUnitPrice = ti.afterDiscountPrice || ti.price;
-      return '<tr style="font-size:8pt;line-height:1.6;"><td style="text-align:center;padding:3pt 2pt;">'+fc(displayTotal)+'</td><td style="text-align:center;padding:3pt 2pt;">'+fc(displayUnitPrice)+'</td><td style="text-align:center;padding:3pt 2pt;">'+numSpan(ti.quantity)+'</td><td style="text-align:right;padding:3pt 2pt;">'+displayName+'</td></tr>';
-    }).join('');
+    const tLines = sec.triggerItems.map(ti =>
+      '<tr style="font-size:8pt;line-height:1.6;"><td style="text-align:center;padding:3pt 2pt;">'+fc(ti.lineTotal)+'</td><td style="text-align:center;padding:3pt 2pt;">'+fc(ti.price)+'</td><td style="text-align:center;padding:3pt 2pt;">'+numSpan(ti.quantity)+'</td><td style="text-align:right;padding:3pt 2pt;">'+ti.name+'</td></tr>'
+    ).join('');
 
-    const rLines = sec.rewardItems.filter(ri => ri.barcode !== '_group_discount_').map(ri =>
+    const rLines = sec.rewardItems.map(ri =>
       '<tr style="font-size:8pt;line-height:1.6;"><td style="text-align:center;padding:3pt 2pt;">'+(sec.type===1?fc(0):fc(ri.lineTotal))+'</td><td style="text-align:center;padding:3pt 2pt;">'+(sec.type===1?fc(0):fc(ri.price))+'</td><td style="text-align:center;padding:3pt 2pt;">'+numSpan(ri.quantity)+'</td><td style="text-align:right;padding:3pt 2pt;">'+ri.name+'</td></tr>'
     ).join('');
 
-    const dLine = (sec.type === 0 && !sec.afterDiscount)
+    const dLine = sec.type === 0
       ? '<tr style="font-size:7.5pt;"><td style="text-align:center;padding:2pt;">'+fcNeg(sec.totalDiscount)+'</td><td colspan="3" style="text-align:right;padding:2pt;">Discount '+sec.discountPercent+'%</td></tr>'
       : '';
 
