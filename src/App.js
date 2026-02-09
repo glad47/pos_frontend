@@ -24,8 +24,6 @@ const styles = {
   primaryBtn: { background: '#2563eb', color: '#fff' },
   dangerBtn: { background: '#dc3545', color: '#fff' },
   successBtn: { background: '#28a745', color: '#fff' },
-  productGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '15px', marginTop: '15px' },
-  productCard: { background: '#fff', borderRadius: '12px', padding: '15px', cursor: 'pointer', transition: 'all 0.2s', border: '2px solid #e0e0e0', textAlign: 'center' },
   qtyBtn: { width: '30px', height: '30px', borderRadius: '50%', border: 'none', background: '#2563eb', color: '#fff', cursor: 'pointer', fontWeight: 'bold' },
   modal: { position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 },
   modalContent: { background: '#fff', borderRadius: '20px', padding: '30px', maxWidth: '500px', width: '90%', boxShadow: '0 10px 40px rgba(0,0,0,0.3)' },
@@ -36,413 +34,21 @@ const styles = {
   inputError: { borderColor: '#dc3545' },
   checkboxContainer: { display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '15px', padding: '12px', background: '#f8f9fa', borderRadius: '10px', cursor: 'pointer' },
   checkbox: { width: '20px', height: '20px', cursor: 'pointer' },
-  
-  // Cart Component Styles
-  cart: {
-    background: '#fff',
-    borderRadius: '15px',
-    padding: '20px',
-    boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-    height: 'fit-content',
-  },
-  cartTitle: {
-    fontSize: '20px',
-    fontWeight: 'bold',
-    marginBottom: '20px',
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    color: '#333',
-  },
-  itemCount: {
-    background: '#2563eb',
-    padding: '4px 12px',
-    borderRadius: '15px',
-    fontSize: '12px',
-    color: '#fff',
-  },
-  emptyCart: {
-    textAlign: 'center',
-    padding: '60px 20px',
-    color: '#999',
-  },
-  cartItem: {
-    background: '#f8f9fa',
-    borderRadius: '10px',
-    padding: '15px',
-    marginBottom: '12px',
-    border: '1px solid #e0e0e0',
-    transition: 'all 0.2s',
-  },
-  itemHeader: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: '10px',
-  },
-  itemName: {
-    fontWeight: 'bold',
-    fontSize: '15px',
-    color: '#333',
-  },
-  itemPrice: {
-    color: '#2563eb',
-    fontWeight: 'bold',
-    fontSize: '16px',
-  },
-  itemDetails: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  quantityControl: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '10px',
-  },
-  quantity: {
-    minWidth: '30px',
-    textAlign: 'center',
-    fontSize: '16px',
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  removeBtn: {
-    background: 'transparent',
-    border: 'none',
-    color: '#dc3545',
-    cursor: 'pointer',
-    fontSize: '12px',
-    padding: '5px 10px',
-    fontWeight: 'bold',
-  },
-  promoTag: {
-    display: 'inline-block',
-    background: '#d4edda',
-    color: '#155724',
-    padding: '4px 10px',
-    borderRadius: '5px',
-    fontSize: '11px',
-    marginTop: '8px',
-    marginRight: '5px',
-    fontWeight: 'bold',
-  },
-  freeTag: {
-    display: 'inline-block',
-    background: '#d1ecf1',
-    color: '#0c5460',
-    padding: '4px 10px',
-    borderRadius: '5px',
-    fontSize: '11px',
-    marginTop: '8px',
-    marginRight: '5px',
-    fontWeight: 'bold',
-  },
-  summary: {
-    borderTop: '2px solid #e0e0e0',
-    paddingTop: '20px',
-    marginTop: '20px',
-  },
-  summaryRow: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    marginBottom: '12px',
-    fontSize: '15px',
-    color: '#333',
-  },
-  totalRow: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    fontSize: '24px',
-    fontWeight: 'bold',
-    color: '#2563eb',
-    paddingTop: '15px',
-    borderTop: '2px solid #2563eb',
-    marginTop: '10px',
-  },
-  checkoutBtn: {
-    width: '100%',
-    padding: '15px',
-    borderRadius: '10px',
-    border: 'none',
-    cursor: 'pointer',
-    fontWeight: 'bold',
-    fontSize: '16px',
-    background: '#2563eb',
-    color: '#fff',
-    marginTop: '20px',
-    transition: 'all 0.3s',
-  },
-  disabledBtn: {
-    background: '#ccc',
-    cursor: 'not-allowed',
-    opacity: 0.6,
-  },
-  discountText: {
-    color: '#28a745',
-    fontWeight: 'bold',
-  },
-  phoneInputContainer: { 
-    display: 'flex', 
-    gap: '10px', 
-    marginBottom: '15px' 
-  },
-  phonePrefix: { 
-    padding: '15px', 
-    borderRadius: '10px', 
-    border: '2px solid #e0e0e0', 
-    background: '#f8f9fa', 
-    color: '#333', 
-    fontSize: '16px', 
-    fontWeight: 'bold', 
-    minWidth: '80px', 
-    textAlign: 'center' 
-  },
+  phoneInputContainer: { display: 'flex', gap: '10px', marginBottom: '15px' },
+  phonePrefix: { padding: '15px', borderRadius: '10px', border: '2px solid #e0e0e0', background: '#f8f9fa', color: '#333', fontSize: '16px', fontWeight: 'bold', minWidth: '80px', textAlign: 'center' },
 };
 
-const categoryEmojis = { Beverages: '☕', Bakery: '🥐', Food: '🥪', Snacks: '🍪', default: '📦' };
-
-// Format currency with ﷼ (Saudi Riyal)
 const fc = (amount) => `${(Number(amount) || 0).toFixed(2)} ﷼`;
 const fcNeg = (amount) => `-${(Number(amount) || 0).toFixed(2)} ﷼`;
 
-// Validation Functions
 const validateSaudiPhone = (phone) => {
-  // Remove any spaces or dashes
   const cleaned = phone.replace(/[\s-]/g, '');
-  // Saudi phone numbers: 9 digits starting with 5
-  const saudiPattern = /^5[0-9]{8}$/;
-  return saudiPattern.test(cleaned);
+  return /^5[0-9]{8}$/.test(cleaned);
 };
 
 const validateSaudiVAT = (vat) => {
-  // Saudi VAT: 15 digits
   const cleaned = vat.replace(/[\s-]/g, '');
   return /^[0-9]{15}$/.test(cleaned);
-};
-
-// Cart Component
-const Cart = ({ items, totals, onUpdateQuantity, onRemoveItem, onCheckout, loading, hasUnresolvedConflicts }) => {
-  const { subtotal, totalDiscount, totalTax, total, sections, remainingItems } = totals;
-
-  // Build item details with promotion info
-  const buildItemDetails = () => {
-    return items.map(item => {
-      const promos = [];
-      let itemDiscount = 0;
-
-      sections.forEach(sec => {
-        // Check if it's a trigger item
-        sec.triggerItems.forEach(ti => {
-          if (ti.barcode === item.barcode) {
-            promos.push({
-              name: sec.loyaltyName,
-              type: sec.type === 1 ? 'BOGO' : 'DISCOUNT',
-            });
-          }
-        });
-
-        // Check if it's a reward item
-        sec.rewardItems.forEach(ri => {
-          if (ri.barcode === item.barcode) {
-            promos.push({
-              name: sec.loyaltyName,
-              type: sec.type === 1 ? 'BOGO' : 'DISCOUNT',
-              freeItems: ri.freeQty,
-            });
-            itemDiscount += ri.discountAmount;
-          }
-        });
-      });
-
-      return {
-        ...item,
-        itemSubtotal: item.price * item.quantity,
-        itemDiscount,
-        promos,
-      };
-    });
-  };
-
-  const itemDetails = buildItemDetails();
-
-  return (
-    <div style={styles.cart}>
-      <div style={styles.cartTitle}>
-        <span>🛒 Shopping Cart</span>
-        {items.length > 0 && <span style={styles.itemCount}>{items.length} items</span>}
-      </div>
-
-      {items.length === 0 ? (
-        <div style={styles.emptyCart}>
-          <div style={{ fontSize: '64px', marginBottom: '15px' }}>🛒</div>
-          <p style={{ fontSize: '16px', marginBottom: '5px', fontWeight: 'bold' }}>Cart is empty</p>
-          <p style={{ fontSize: '13px', color: '#bbb' }}>Scan a barcode or click a product to add</p>
-        </div>
-      ) : (
-        <>
-          <div style={{ maxHeight: '420px', overflowY: 'auto', marginBottom: '20px' }}>
-            {itemDetails.map((item) => (
-              <div
-                key={item.barcode}
-                style={styles.cartItem}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = '#e3f2fd';
-                  e.currentTarget.style.borderColor = '#2563eb';
-                  e.currentTarget.style.transform = 'translateX(-2px)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = '#f8f9fa';
-                  e.currentTarget.style.borderColor = '#e0e0e0';
-                  e.currentTarget.style.transform = 'translateX(0)';
-                }}
-              >
-                <div style={styles.itemHeader}>
-                  <div style={{ flex: 1 }}>
-                    <div style={styles.itemName}>{item.name}</div>
-                    <div style={{ fontSize: '12px', color: '#666', marginTop: '3px' }}>
-                      {fc(item.price)} each
-                    </div>
-                  </div>
-                  <div style={styles.itemPrice}>{fc(item.itemSubtotal)}</div>
-                </div>
-
-                <div style={styles.itemDetails}>
-                  <div style={styles.quantityControl}>
-                    <button
-                      style={styles.qtyBtn}
-                      onClick={() => onUpdateQuantity(item.barcode, -1)}
-                      onMouseEnter={(e) => (e.currentTarget.style.transform = 'scale(1.1)')}
-                      onMouseLeave={(e) => (e.currentTarget.style.transform = 'scale(1)')}
-                    >
-                      −
-                    </button>
-                    <span style={styles.quantity}>{item.quantity}</span>
-                    <button
-                      style={styles.qtyBtn}
-                      onClick={() => onUpdateQuantity(item.barcode, 1)}
-                      onMouseEnter={(e) => (e.currentTarget.style.transform = 'scale(1.1)')}
-                      onMouseLeave={(e) => (e.currentTarget.style.transform = 'scale(1)')}
-                    >
-                      +
-                    </button>
-                  </div>
-                  <button
-                    style={styles.removeBtn}
-                    onClick={() => onRemoveItem(item.barcode)}
-                    onMouseEnter={(e) => (e.currentTarget.style.color = '#a71d2a')}
-                    onMouseLeave={(e) => (e.currentTarget.style.color = '#dc3545')}
-                  >
-                    ✕ Remove
-                  </button>
-                </div>
-
-                {/* Promotions applied */}
-                {item.promos && item.promos.length > 0 && (
-                  <div>
-                    {item.promos.map((promo, idx) => (
-                      <span key={idx} style={promo.type === 'BOGO' ? styles.freeTag : styles.promoTag}>
-                        {promo.type === 'BOGO'
-                          ? ` ${promo.freeItems || 0} FREE`
-                          : ` ${promo.name}`}
-                      </span>
-                    ))}
-                  </div>
-                )}
-
-                {/* Item discount */}
-                {item.itemDiscount > 0 && (
-                  <div style={{ fontSize: '12px', color: '#28a745', marginTop: '8px', fontWeight: 'bold' }}>
-                    💚 You save: {fc(item.itemDiscount)}
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-
-          {/* Active Promotions Summary */}
-          {sections.length > 0 && (
-            <div style={{ 
-              marginBottom: '15px', 
-              background: 'linear-gradient(135deg, #f0fff4 0%, #d4edda 100%)', 
-              padding: '15px', 
-              borderRadius: '10px', 
-              border: '2px solid #28a745' 
-            }}>
-              <h4 style={{ fontSize: '14px', color: '#155724', marginBottom: '10px', fontWeight: 'bold' }}>
-                 Active Promotions
-              </h4>
-              {sections.map((sec, idx) => (
-                <div key={idx} style={{ fontSize: '12px', marginBottom: '6px', color: '#155724' }}>
-                  <strong>✓ {sec.loyaltyName}</strong>
-                  <div style={{ marginLeft: '15px', marginTop: '2px' }}>
-                    {sec.type === 1 ? (
-                      <>FREE items! </>
-                    ) : sec.afterDiscount ? (
-                      <>{sec.triggerItems.reduce((s, ti) => s + ti.quantity, 0)} for {fc(sec.afterDiscount)}</>
-                    ) : (
-                      <>{sec.discountPercent}% discount</>
-                    )}
-                    {' • '}Save {fc(sec.totalDiscount)}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* Summary */}
-          <div style={styles.summary}>
-            <div style={styles.summaryRow}>
-              <span>Subtotal</span>
-              <span style={{ fontWeight: 'bold' }}>{fc(subtotal)}</span>
-            </div>
-
-            {totalDiscount > 0 && (
-              <div style={{ ...styles.summaryRow, ...styles.discountText }}>
-                <span>💚 Total Discount</span>
-                <span>{fcNeg(totalDiscount)}</span>
-              </div>
-            )}
-
-            <div style={{ ...styles.summaryRow, color: '#666' }}>
-              <span>Tax (15%)</span>
-              <span style={{ fontWeight: 'bold' }}>{fc(totalTax)}</span>
-            </div>
-
-            <div style={styles.totalRow}>
-              <span>Grand Total</span>
-              <span>{fc(total)}</span>
-            </div>
-          </div>
-
-          <button
-            style={{
-              ...styles.checkoutBtn,
-              ...(loading || hasUnresolvedConflicts ? styles.disabledBtn : {}),
-            }}
-            onClick={onCheckout}
-            disabled={loading || items.length === 0 || hasUnresolvedConflicts}
-            onMouseEnter={(e) => {
-              if (!loading && !hasUnresolvedConflicts) {
-                e.currentTarget.style.background = '#1d4ed8';
-                e.currentTarget.style.transform = 'translateY(-2px)';
-                e.currentTarget.style.boxShadow = '0 4px 12px rgba(37,99,235,0.4)';
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (!loading && !hasUnresolvedConflicts) {
-                e.currentTarget.style.background = '#2563eb';
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = 'none';
-              }
-            }}
-          >
-            {loading ? '⏳ Processing...' : hasUnresolvedConflicts ? '⚠️ Select Promotions First' : '✓ Proceed to Checkout'}
-          </button>
-        </>
-      )}
-    </div>
-  );
 };
 
 function App() {
@@ -489,7 +95,7 @@ function App() {
       const [prodRes, loyRes] = await Promise.all([productApi.getAll(), loyaltyApi.getActive()]);
       setProducts(Array.isArray(prodRes.data) ? prodRes.data : []);
       setLoyalties(Array.isArray(loyRes.data) ? loyRes.data : (loyRes.data?.data || []));
-      console.log('[POS] Loaded loyalties:', JSON.stringify(loyRes.data, null, 2));
+      console.log('[POS] Loaded', prodRes.data?.length || 0, 'products');
       showMessage('Data refreshed successfully');
     } catch (error) { 
       console.error('Error loading data:', error);
@@ -499,34 +105,20 @@ function App() {
 
   useEffect(() => { loadData(); }, [loadData]);
 
-  useEffect(() => {
-    if (customerDisplayWindow && !customerDisplayWindow.closed) {
-      updateCustomerDisplay();
-    }
-  }, [cart, loyaltySelections]);
-
   const showMessage = (msg) => { setMessage(msg); setTimeout(() => setMessage(''), 3000); };
 
   const handleOpenSession = async () => {
-    if (!cashierName.trim()) { 
-      showMessage('Please enter your name'); 
-      return; 
-    }
-    
+    if (!cashierName.trim()) { showMessage('Please enter your name'); return; }
     try { 
       setLoading(true); 
-      
       const response = await sessionApi.open({ 
         cashierName: cashierName.trim(), 
         openingCash: parseFloat(openingCash) || 0 
       }); 
-      
       const isExisting = response.data.isExistingSession || false;
       const sessionData = response.data.session || response.data;
-      
       setSession(sessionData); 
       setIsExistingSession(isExisting);
-      
       if (isExisting) {
         showMessage('✓ Continuing your existing session');
       } else {
@@ -537,9 +129,7 @@ function App() {
       console.error('Session error:', e);
       showMessage('Error opening session'); 
     } 
-    finally { 
-      setLoading(false); 
-    }
+    finally { setLoading(false); }
   };
 
   const handleCloseSession = async () => {
@@ -560,12 +150,8 @@ function App() {
       setIsExistingSession(false);
       showMessage('Session closed successfully');
     }
-    catch (e) { 
-      showMessage('Error closing session'); 
-    } 
-    finally { 
-      setLoading(false); 
-    }
+    catch (e) { showMessage('Error closing session'); } 
+    finally { setLoading(false); }
   };
 
   const handleRefreshData = async () => {
@@ -574,232 +160,13 @@ function App() {
     setLoading(false);
   };
 
-const openCustomerDisplay = () => {
-  if (customerDisplayWindow && !customerDisplayWindow.closed) {
-    customerDisplayWindow.focus();
-    return;
-  }
-
-  const display = window.open('', 'CustomerDisplay', 'width=900,height=700');
-  if (display) {
-    display.document.write(`
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <title>Customer Display - ${companyInfo.companyNameEn}</title>
-        <meta charset="UTF-8">
-        <style>
-          * { margin: 0; padding: 0; box-sizing: border-box; }
-          body {
-            min-height: 100vh;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            padding: 40px;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            color: #fff;
-          }
-          .header { text-align: center; margin-bottom: 40px; }
-          .logo { font-size: 56px; font-weight: bold; margin-bottom: 10px; text-shadow: 3px 3px 6px rgba(0,0,0,0.4); }
-          .subtitle { font-size: 24px; opacity: 0.95; font-weight: 500; }
-          .cart-panel { 
-            background: #fff; 
-            border-radius: 20px; 
-            padding: 40px; 
-            max-width: 900px; 
-            margin: 0 auto; 
-            box-shadow: 0 15px 50px rgba(0,0,0,0.4); 
-            color: #333; 
-            min-height: 500px;
-          }
-          .bill-container { max-height: 600px; overflow-y: auto; padding-right: 10px; }
-          
-          .loyalty-section { margin-bottom: 15px; padding-bottom: 12px; border-bottom: 1px dashed #bbb; }
-          .loyalty-name { font-weight: bold; font-size: 18px; color: #333; margin-bottom: 6px; }
-          .loyalty-description { font-size: 15px; color: #555; margin-bottom: 8px; }
-          .line-item { display: flex; justify-content: space-between; padding: 4px 12px; font-size: 16px; color: #333; }
-          .discount-line { display: flex; justify-content: space-between; padding: 4px 12px; font-size: 16px; color: #333; }
-          .section-subtotal { 
-            display: flex; 
-            justify-content: space-between; 
-            padding: 6px 12px; 
-            font-size: 16px; 
-            font-weight: bold; 
-            color: #333; 
-            border-top: 1px solid #ddd; 
-            margin-top: 5px; 
-          }
-          .other-items-header { font-weight: bold; font-size: 18px; color: #333; margin-bottom: 6px; }
-          
-          .totals-section { border-top: 2px solid #333; padding-top: 15px; margin-top: 15px; }
-          .total-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 20px; }
-          .grand-total { 
-            display: flex; 
-            justify-content: space-between; 
-            font-size: 28px; 
-            font-weight: bold; 
-            color: #2563eb; 
-            padding-top: 12px; 
-            border-top: 2px solid #333; 
-            margin-top: 8px; 
-          }
-          
-          .empty-cart { text-align: center; padding: 80px 20px; font-size: 26px; color: #999; }
-          .footer { 
-            text-align: center; 
-            margin-top: 40px; 
-            font-size: 20px; 
-            opacity: 0.95; 
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.3); 
-          }
-        </style>
-      </head>
-      <body>
-        <div class="header">
-          <div class="logo">🏪 ${companyInfo.companyNameEn}</div>
-          <div class="subtitle">شاشة العميل / Customer Display</div>
-        </div>
-        <div class="cart-panel" id="cartContent">
-          <div class="empty-cart">
-            <div style="font-size: 80px; margin-bottom: 20px">🛒</div>
-            <div style="margin-bottom: 10px">أهلاً بك</div>
-            <div>Welcome!</div>
-          </div>
-        </div>
-        <div class="footer">شكراً لتسوقك معنا 🙏 Thank you for shopping with us!</div>
-        
-        <script>
-          window.addEventListener('message', function(event) {
-            if (event.data && event.data.type === 'UPDATE_CART') {
-              updateDisplay(event.data.data);
-            }
-          });
-          
-          function updateDisplay(data) {
-            const fc = (amount) => amount.toFixed(2) + ' ﷼';
-            const fcNeg = (amount) => '-' + amount.toFixed(2) + ' ﷼';
-            const container = document.getElementById('cartContent');
-            
-            if (!data.cart || data.cart.length === 0) {
-              container.innerHTML = '<div class="empty-cart"><div style="font-size: 80px; margin-bottom: 20px">🛒</div><div style="margin-bottom: 10px">أهلاً بك</div><div>Welcome!</div></div>';
-              return;
-            }
-            
-            let html = '<div class="bill-container">';
-            
-            if (data.sections && data.sections.length > 0) {
-              data.sections.forEach(sec => {
-                html += '<div class="loyalty-section">';
-                html += '<div class="loyalty-name">' + sec.loyaltyName + '</div>';
-                
-                if (sec.type === 1) {
-                  const triggerQty = sec.triggerItems[0]?.quantity || 0;
-                  const freeQty = sec.rewardItems[0]?.freeQty || 0;
-                  html += '<div class="loyalty-description">Buy ' + triggerQty + ' Get ' + freeQty + ' Free / اشتر واحصل مجاناً</div>';
-                } else if (sec.afterDiscount) {
-                  const totalQty = sec.triggerItems.reduce((s, ti) => s + ti.quantity, 0);
-                  html += '<div class="loyalty-description">' + totalQty + ' for ' + fc(sec.afterDiscount) + ' / ' + totalQty + ' بـ ' + fc(sec.afterDiscount) + '</div>';
-                } else {
-                  html += '<div class="loyalty-description">' + sec.discountPercent + '% Off / ' + sec.discountPercent + '% خصم</div>';
-                }
-                
-                if (sec.triggerItems) {
-                  sec.triggerItems.forEach(ti => {
-                    var displayName = ti.loyaltyLabel || ti.name;
-                    var displayTotal = ti.afterDiscountPrice ? fc(ti.afterDiscountPrice * ti.quantity) : fc(ti.lineTotal);
-                    html += '<div class="line-item"><span>' + displayName + ' x ' + ti.quantity + '</span><span>' + displayTotal + '</span></div>';
-                  });
-                }
-                
-                if (sec.rewardItems) {
-                  sec.rewardItems.filter(ri => ri.barcode !== '_group_discount_').forEach(ri => {
-                    const priceDisplay = sec.type === 1 ? fc(0) : fc(ri.lineTotal);
-                    html += '<div class="line-item"><span>' + ri.name + ' x ' + ri.quantity + '</span><span>' + priceDisplay + '</span></div>';
-                  });
-                }
-                
-                if (sec.type === 0 && sec.totalDiscount > 0 && !sec.afterDiscount) {
-                  html += '<div class="discount-line" style="color:#28a745;font-weight:bold"><span>💚 Discount</span><span>' + fcNeg(sec.totalDiscount) + '</span></div>';
-                }
-                
-                html += '<div class="section-subtotal"><span>Subtotal</span><span>' + fc(sec.sectionSubtotal) + '</span></div>';
-                html += '</div>';
-              });
-            }
-            
-            if (data.remainingItems && data.remainingItems.length > 0) {
-              html += '<div class="loyalty-section">';
-              
-              if (data.sections && data.sections.length > 0) {
-                html += '<div class="other-items-header">Other Items</div>';
-              }
-              
-              data.remainingItems.forEach(item => {
-                html += '<div class="line-item"><span>' + item.name + ' x ' + item.quantity + '</span><span>' + fc(item.itemSubtotal) + '</span></div>';
-              });
-              
-              html += '</div>';
-            }
-            
-            html += '</div>';
-            
-            html += '<div class="totals-section">';
-            html += '<div class="total-row"><span>Subtotal</span><span>' + fc(data.subtotal) + '</span></div>';
-            
-            if (data.discount > 0) {
-              html += '<div class="total-row"><span>Discount</span><span>' + fcNeg(data.discount) + '</span></div>';
-            }
-            
-            html += '<div class="total-row"><span>Tax</span><span>' + fc(data.tax) + '</span></div>';
-            html += '<div class="grand-total"><span>Total</span><span>' + fc(data.total) + '</span></div>';
-            html += '</div>';
-            
-            container.innerHTML = html;
-          }
-          
-          if (window.opener) {
-            window.opener.postMessage({ type: 'DISPLAY_READY' }, '*');
-          }
-        </script>
-      </body>
-      </html>
-    `);
-    display.document.close();
-    
-    setCustomerDisplayWindow(display);
-    updateCustomerDisplay();
-    showMessage('Customer display opened');
-  } else {
-    showMessage('Please allow popups for customer display');
-  }
-};
-
-const updateCustomerDisplay = () => {
-  if (customerDisplayWindow && !customerDisplayWindow.closed) {
-    const displayData = {
-      cart: cart.map(item => ({
-        name: item.name,
-        quantity: item.quantity,
-        price: item.price,
-        total: item.price * item.quantity
-      })),
-      sections: totals.sections || [],
-      remainingItems: totals.remainingItems || [],
-      subtotal: totals.subtotal || 0,
-      discount: totals.totalDiscount || 0,
-      tax: totals.totalTax || 0,
-      total: totals.total || 0,
-      companyName: companyInfo.companyNameEn || 'Q POS'
-    };
-
-    customerDisplayWindow.postMessage({
-      type: 'UPDATE_CART',
-      data: displayData
-    }, '*');
-  }
-};
-
   const handleAddByBarcode = async () => {
     if (!barcode.trim()) return;
-    try { const r = await productApi.getByBarcode(barcode.trim()); addToCart(r.data); setBarcode(''); }
+    try { 
+      const r = await productApi.getByBarcode(barcode.trim()); 
+      addToCart(r.data); 
+      setBarcode(''); 
+    }
     catch (e) { showMessage('Product not found'); }
   };
 
@@ -822,42 +189,88 @@ const updateCustomerDisplay = () => {
     cartItems.forEach(item => { cartMap[item.barcode] = item; });
     const triggerGroups = {};
 
-    // Build product ID → barcode map
     const idToBarcode = {};
     products.forEach(p => { if (p.id != null) idToBarcode[String(p.id)] = p.barcode; });
     const resolveIds = (idStr) => (idStr || '').split(',').map(s => s.trim()).filter(Boolean).map(id => idToBarcode[id] || id);
 
-    // Normalize loyalty fields to handle both snake_case and camelCase
     const normD = (l) => ({
       ...l,
       triggerProductIds: l.triggerProductIds || l.trigger_product_ids || '',
       rewardProductIds: l.rewardProductIds || l.reward_product_ids || '',
       minQuantity: parseInt(l.minQuantity ?? l.min_quantity ?? l.minquantity) || 1,
       maxQuantity: parseInt(l.maxQuantity ?? l.max_quantity ?? l.maxquantity) || 0,
-      rewardQuantity: parseInt(l.rewardQuantity ?? l.reward_quantity ?? l.rewardquantity) || 1,
+      rewardQuantity: parseInt((l.rewardQuantity ?? l.reward_quantity) || l.rewardquantity) || 1,
     });
 
     loyalties.forEach(rawLoyalty => {
       if (!rawLoyalty.active || rawLoyalty.type !== 1) return;
       const loyalty = normD(rawLoyalty);
+      const afterDiscount = parseFloat(loyalty.afterDiscount ?? loyalty.after_discount) || 0;
       const triggerBarcodes = resolveIds(loyalty.triggerProductIds);
       const rewardBarcodes = resolveIds(loyalty.rewardProductIds);
       if (!triggerBarcodes.length || !rewardBarcodes.length) return;
       const minQty = loyalty.minQuantity;
       const rewardQtyPerSet = loyalty.rewardQuantity;
 
+      // Step 1: Check if trigger and reward lists are already different (fixed sync data)
+      const triggerSet = new Set(triggerBarcodes);
+      const rewardSet = new Set(rewardBarcodes);
+      const listsAreDifferent = triggerBarcodes.length !== rewardBarcodes.length ||
+        triggerBarcodes.some(tb => !rewardSet.has(tb)) ||
+        rewardBarcodes.some(rb => !triggerSet.has(rb));
+
+      let realTriggerBarcodes = triggerBarcodes;
+      let realRewardBarcodes = rewardBarcodes;
+      let hasDistinctRewards = false;
+
+      if (listsAreDifferent) {
+        // Data already has separate trigger/reward from fixed sync
+        hasDistinctRewards = true;
+      } else if (afterDiscount > 0) {
+        // Step 2: Legacy fallback — use after_discount price to identify real trigger
+        const productPriceMap = {};
+        products.forEach(p => { if (p.barcode) productPriceMap[p.barcode] = p.price; });
+        Object.keys(cartMap).forEach(bc => { if (!productPriceMap[bc]) productPriceMap[bc] = cartMap[bc].price; });
+
+        const triggerByPrice = triggerBarcodes.filter(tb => {
+          const price = productPriceMap[tb];
+          return price != null && Math.abs(price - afterDiscount) < 0.01;
+        });
+        if (triggerByPrice.length > 0) {
+          realTriggerBarcodes = triggerByPrice;
+          realRewardBarcodes = rewardBarcodes.filter(rb => !realTriggerBarcodes.includes(rb));
+          if (realRewardBarcodes.length > 0) {
+            hasDistinctRewards = true;
+          }
+        }
+      }
+
+      // Step 3: If still no distinct rewards, treat as same-product BOGO
+      if (!hasDistinctRewards) {
+        realRewardBarcodes = rewardBarcodes;
+      }
+
       let activeTrigger = null;
-      for (const tb of triggerBarcodes) {
+      for (const tb of realTriggerBarcodes) {
         if (!cartMap[tb]) continue;
         const qty = cartMap[tb].quantity;
-        // If trigger and reward are same product, need minQty + rewardQty total
-        const isSameProd = rewardBarcodes.includes(tb);
-        const requiredQty = isSameProd ? (minQty + rewardQtyPerSet) : minQty;
-        if (qty >= requiredQty) { activeTrigger = tb; break; }
+        
+        if (hasDistinctRewards) {
+          const hasRewardInCart = realRewardBarcodes.some(rb => rb !== tb && cartMap[rb] && cartMap[rb].quantity >= rewardQtyPerSet);
+          if (qty >= minQty && hasRewardInCart) { activeTrigger = tb; break; }
+        } else if (realRewardBarcodes.includes(tb)) {
+          const requiredQty = minQty + rewardQtyPerSet;
+          if (qty >= requiredQty) { activeTrigger = tb; break; }
+        }
       }
       if (!activeTrigger) return;
 
-      const rewardsInCart = rewardBarcodes.filter(rb => cartMap[rb] && cartMap[rb].quantity > 0);
+      let rewardsInCart;
+      if (hasDistinctRewards) {
+        rewardsInCart = realRewardBarcodes.filter(rb => rb !== activeTrigger && cartMap[rb] && cartMap[rb].quantity > 0);
+      } else {
+        rewardsInCart = [activeTrigger];
+      }
       if (rewardsInCart.length === 0) return;
       if (!triggerGroups[activeTrigger]) triggerGroups[activeTrigger] = [];
       triggerGroups[activeTrigger].push({ loyalty, triggerBarcode: activeTrigger, rewardsInCart });
@@ -935,20 +348,17 @@ const updateCustomerDisplay = () => {
     const bogoRewardedBarcodes = new Set();
     const currentSel = selectionsRef.current;
 
-    // Build product ID → barcode map so loyalty product IDs resolve to cart barcodes
     const idToBarcode = {};
     products.forEach(p => { if (p.id != null) idToBarcode[String(p.id)] = p.barcode; });
-    // Helper: resolve a list of product IDs to barcodes
     const resolveIds = (idStr) => (idStr || '').split(',').map(s => s.trim()).filter(Boolean).map(id => idToBarcode[id] || id);
 
-    // Normalize loyalty fields to handle both snake_case and camelCase from backend
     const norm = (l) => ({
       ...l,
       triggerProductIds: l.triggerProductIds || l.trigger_product_ids || '',
       rewardProductIds: l.rewardProductIds || l.reward_product_ids || '',
       minQuantity: parseInt(l.minQuantity ?? l.min_quantity ?? l.minquantity) || 1,
       maxQuantity: parseInt(l.maxQuantity ?? l.max_quantity ?? l.maxquantity) || 0,
-      rewardQuantity: parseInt(l.rewardQuantity ?? l.reward_quantity ?? l.rewardquantity) || 1,
+      rewardQuantity: parseInt((l.rewardQuantity ?? l.reward_quantity) ?? l.rewardquantity) || 1,
       discountAmount: parseFloat(l.discountAmount ?? l.discount_amount) || 0,
       afterDiscount: parseFloat(l.afterDiscount ?? l.after_discount) || 0,
       discountPercent: parseFloat(l.discountPercent ?? l.discount_percent) || 0,
@@ -969,7 +379,7 @@ const updateCustomerDisplay = () => {
 
     const sorted = [...activeLoyalties].sort((a, b) => (b.type || 0) - (a.type || 0));
     const sections = [];
-    const consumed = {}; // tracks consumed qty per barcode
+    const consumed = {};
 
     sorted.forEach(rawLoyalty => {
       const loyalty = norm(rawLoyalty);
@@ -977,34 +387,20 @@ const updateCustomerDisplay = () => {
       let rewardBarcodes = resolveIds(loyalty.rewardProductIds);
       if (!triggerBarcodes.length) return;
       
-      console.log(`[Loyalty ${loyalty.id}] "${loyalty.name}" type=${loyalty.type} trigger=[${triggerBarcodes}] reward=[${rewardBarcodes}] minQty=${loyalty.minQuantity} maxQty=${loyalty.maxQuantity} discountAmt=${loyalty.discountAmount} afterDiscount=${loyalty.afterDiscount}`);
-      
-      // For type 0 fixed discount, rewardBarcodes are not needed (discount applies to trigger group)
-      // So allow empty rewardBarcodes for this case by using triggerBarcodes as fallback
       const fixedDiscount = loyalty.discountAmount;
       const afterDiscount = loyalty.afterDiscount;
       const isFixedDiscount = fixedDiscount > 0 || afterDiscount > 0;
       
       if (loyalty.type === 0 && isFixedDiscount) {
-        // rewardBarcodes not needed for fixed discount, use trigger as fallback
         if (!rewardBarcodes.length) rewardBarcodes = [...triggerBarcodes];
       } else {
-        // For other types, both trigger and reward are required
         if (!rewardBarcodes.length) return;
       }
 
       const minQty = loyalty.minQuantity;
       const maxQty = loyalty.maxQuantity;
 
-      // ====== TYPE 0: DISCOUNT (fixed-amount or percentage) ======
       if (loyalty.type === 0 && isFixedDiscount) {
-        // FIXED DISCOUNT: eligible products form groups of exactly minQty.
-        // Only minQty items per set get the discounted price.
-        // maxQty limits how many sets can be formed.
-        // Items beyond (maxQty * minQty) remain at normal price.
-        // rewardQuantity is NOT used for this type.
-        
-        // Collect available items from the eligible group
         const eligibleInCart = [];
         for (const bc of triggerBarcodes) {
           const item = cartMap[bc];
@@ -1015,24 +411,19 @@ const updateCustomerDisplay = () => {
           }
         }
         
-        // Total available from the group
         const totalAvailable = eligibleInCart.reduce((sum, e) => sum + e.available, 0);
         if (totalAvailable < minQty) return;
         
-        // How many complete sets of minQty can we make?
         let maxPossibleSets = Math.floor(totalAvailable / minQty);
-        // maxQty limits the number of sets (0 = unlimited)
         let actualSets = maxQty === 0 ? maxPossibleSets : Math.min(maxPossibleSets, maxQty);
         if (actualSets <= 0) return;
         
-        // Only consume exactly actualSets * minQty items (the rest stay at normal price)
         const totalItemsConsumed = actualSets * minQty;
         let totalItemsNeeded = totalItemsConsumed;
         const sectionTriggerItems = [];
         const sectionRewardItems = [];
         let sectionGross = 0;
         
-        // Consume items from the eligible group (pick in order they appear)
         for (const e of eligibleInCart) {
           if (totalItemsNeeded <= 0) break;
           const take = Math.min(e.available, totalItemsNeeded);
@@ -1042,8 +433,9 @@ const updateCustomerDisplay = () => {
           sectionTriggerItems.push({
             barcode: e.barcode, name: e.name, price: e.price,
             quantity: take, lineTotal: lineTotal,
-            // Store after-discount info for display: show promotion name and new price
-            afterDiscountPrice: afterDiscount > 0 ? afterDiscount : null,
+            // FIX 1c: afterDiscount is the SET total (e.g., 10.95 for 8 items)
+            // For per-item display, divide by minQty
+            afterDiscountPrice: afterDiscount > 0 ? (afterDiscount / minQty) : null,
             loyaltyLabel: afterDiscount > 0 ? loyalty.name : null,
           });
           
@@ -1051,13 +443,12 @@ const updateCustomerDisplay = () => {
           totalItemsNeeded -= take;
         }
         
-        // Calculate discount: afterDiscount is PER ITEM, not per set
-        // New total = afterDiscount * totalItemsConsumed
-        const newTotal = afterDiscount > 0 ? afterDiscount * totalItemsConsumed : sectionGross - (fixedDiscount * actualSets);
+        // FIX 1a: afterDiscount is the total price for one SET of minQty items
+        // e.g., 8 items for 10.95 total = afterDiscount * actualSets (not * totalItemsConsumed)
+        const newTotal = afterDiscount > 0 ? afterDiscount * actualSets : sectionGross - (fixedDiscount * actualSets);
         const totalDiscountAmt = Math.max(0, sectionGross - newTotal);
         const discountPct = sectionGross > 0 ? Math.round((totalDiscountAmt / sectionGross) * 10000) / 100 : 0;
         
-        // For reward display, just reference the same items (discount is on the whole group)
         sectionRewardItems.push({
           barcode: '_group_discount_',
           name: loyalty.name,
@@ -1073,7 +464,8 @@ const updateCustomerDisplay = () => {
           loyaltyName: loyalty.name,
           type: 0,
           discountPercent: discountPct,
-          afterDiscount: afterDiscount > 0 ? afterDiscount * totalItemsConsumed : 0,
+          // FIX 1b: afterDiscount per set, not per item
+          afterDiscount: afterDiscount > 0 ? afterDiscount * actualSets : 0,
           triggerItems: sectionTriggerItems,
           rewardItems: sectionRewardItems,
           sectionSubtotal: sectionGross - totalDiscountAmt,
@@ -1081,11 +473,9 @@ const updateCustomerDisplay = () => {
         });
         
       } else if (loyalty.type === 0) {
-        // PERCENTAGE DISCOUNT (legacy/manual loyalty programs)
         const pct = parseFloat(loyalty.discountPercent) || 0;
         if (pct <= 0) return;
 
-        // Old logic: find one trigger barcode with enough qty, apply % to reward barcodes
         let triggerBarcode = null, triggerAvailable = 0;
         for (const tb of triggerBarcodes) {
           const item = cartMap[tb];
@@ -1122,55 +512,74 @@ const updateCustomerDisplay = () => {
         }
         
       } else if (loyalty.type === 1) {
-        // ====== TYPE 1: BUY_X_GET_Y ======
-        // When trigger and reward are the SAME product:
-        //   Need (minQty + rewardQty) items per set. First minQty are paid, next rewardQty are free.
-        //   e.g. "Buy 3 get 1 free" with same product: need 4 items. 3 paid + 1 free.
-        // When trigger and reward are DIFFERENT products:
-        //   Need minQty of trigger product + rewardQty of reward product available.
-        
         const rewardQtyPerSet = loyalty.rewardQuantity || 1;
+        const afterDiscount = loyalty.afterDiscount;
         
-        for (const tb of triggerBarcodes) {
-          const triggerItem = cartMap[tb];
-          if (!triggerItem) continue;
-          const triggerAvail = triggerItem.quantity - (consumed[tb] || 0);
-          if (triggerAvail < minQty) continue;
+        // Determine if trigger and reward lists are truly different
+        const triggerSet = new Set(triggerBarcodes);
+        const rewardSet = new Set(rewardBarcodes);
+        const listsAreDifferent = triggerBarcodes.length !== rewardBarcodes.length ||
+          triggerBarcodes.some(tb => !rewardSet.has(tb)) ||
+          rewardBarcodes.some(rb => !triggerSet.has(rb));
+        
+        let realTriggerBarcodes = [...triggerBarcodes];
+        let realRewardBarcodes = [...rewardBarcodes];
+        let hasDistinctRewards = false;
+        
+        // Debug: show what IDs resolved to what barcodes
+        const rawTriggerIds = (loyalty.triggerProductIds || loyalty.trigger_product_ids || '').toString();
+        const rawRewardIds = (loyalty.rewardProductIds || loyalty.reward_product_ids || '').toString();
+        console.log('[BOGO] Program:', loyalty.name, 
+          '\n  Raw trigger IDs:', rawTriggerIds, '→ barcodes:', triggerBarcodes,
+          '\n  Raw reward IDs:', rawRewardIds, '→ barcodes:', rewardBarcodes,
+          '\n  Cart barcodes:', Object.keys(cartMap),
+          '\n  Lists different:', listsAreDifferent,
+          '\n  Reward barcodes in cart:', rewardBarcodes.filter(rb => cartMap[rb]).map(rb => `${rb}(${cartMap[rb]?.name})`),
+          '\n  Reward barcodes NOT in cart:', rewardBarcodes.filter(rb => !cartMap[rb]));
+        
+        if (listsAreDifferent) {
+          hasDistinctRewards = true;
+        } else if (afterDiscount > 0) {
+          // Legacy fallback: trigger and reward lists are the same,
+          // use after_discount price to identify the real trigger product
+          const productPriceMap = {};
+          products.forEach(p => { if (p.barcode) productPriceMap[p.barcode] = p.price; });
+          Object.keys(cartMap).forEach(bc => { if (!productPriceMap[bc]) productPriceMap[bc] = cartMap[bc].price; });
           
-          for (const rb of rewardBarcodes) {
-            if (bogoRewardedBarcodes.has(rb)) continue;
-            const rewardItem = cartMap[rb];
-            if (!rewardItem) continue;
+          const triggerByPrice = triggerBarcodes.filter(tb => {
+            const price = productPriceMap[tb];
+            return price != null && Math.abs(price - afterDiscount) < 0.01;
+          });
+          
+          if (triggerByPrice.length > 0) {
+            realTriggerBarcodes = triggerByPrice;
+            realRewardBarcodes = rewardBarcodes.filter(rb => !realTriggerBarcodes.includes(rb));
+            if (realRewardBarcodes.length > 0) {
+              hasDistinctRewards = true;
+            }
+          }
+          console.log('[BOGO] Legacy after_discount fallback:', loyalty.name, 
+            'afterDiscount:', afterDiscount, 'hasDistinct:', hasDistinctRewards,
+            'trigger:', realTriggerBarcodes, 'reward:', realRewardBarcodes);
+        }
+        
+        if (hasDistinctRewards) {
+          // DIFFERENT PRODUCT BOGO: buy trigger, get reward FREE
+          for (const tb of realTriggerBarcodes) {
+            const triggerItem = cartMap[tb];
+            if (!triggerItem) continue;
+            const triggerAvail = triggerItem.quantity - (consumed[tb] || 0);
+            if (triggerAvail < minQty) continue;
             
-            const isSameProduct = (tb === rb);
-            
-            if (isSameProduct) {
-              // Same product: total items needed per set = minQty + rewardQtyPerSet
-              const totalPerSet = minQty + rewardQtyPerSet;
-              const totalAvail = triggerItem.quantity - (consumed[tb] || 0);
-              if (totalAvail < totalPerSet) continue;
+            let foundMatch = false;
+            for (const rb of realRewardBarcodes) {
+              if (bogoRewardedBarcodes.has(rb)) continue;
+              if (rb === tb) continue;
+              const rewardItem = cartMap[rb];
+              if (!rewardItem) continue;
               
-              const maxPossibleSets = Math.floor(totalAvail / totalPerSet);
-              let actualSets = maxQty === 0 ? maxPossibleSets : Math.min(maxPossibleSets, maxQty);
-              if (actualSets <= 0) continue;
-              
-              const triggerQtyUsed = actualSets * minQty;
-              const freeQty = actualSets * rewardQtyPerSet;
-              
-              bogoRewardedBarcodes.add(rb);
-              sections.push({
-                loyaltyId: loyalty.id || loyalty.name, loyaltyName: loyalty.name, type: 1, discountPercent: 0,
-                triggerItems: [{ barcode: tb, name: triggerItem.name, price: triggerItem.price, quantity: triggerQtyUsed, lineTotal: triggerItem.price * triggerQtyUsed }],
-                rewardItems: [{ barcode: rb, name: rewardItem.name, price: rewardItem.price, quantity: freeQty, freeQty, discountAmount: freeQty * rewardItem.price, lineTotal: 0 }],
-                sectionSubtotal: triggerItem.price * triggerQtyUsed, totalDiscount: freeQty * rewardItem.price
-              });
-              consumed[tb] = (consumed[tb] || 0) + triggerQtyUsed + freeQty;
-              break;
-              
-            } else {
-              // Different products: trigger and reward are separate pools
               const availReward = rewardItem.quantity - (consumed[rb] || 0);
-              if (availReward <= 0) continue;
+              if (availReward < rewardQtyPerSet) continue;
               
               const maxSetsFromTrigger = Math.floor(triggerAvail / minQty);
               const maxSetsFromReward = Math.floor(availReward / rewardQtyPerSet);
@@ -1190,10 +599,77 @@ const updateCustomerDisplay = () => {
               });
               consumed[tb] = (consumed[tb] || 0) + triggerQtyUsed;
               consumed[rb] = (consumed[rb] || 0) + freeQty;
+              foundMatch = true;
               break;
             }
+            if (foundMatch) break;
           }
-          break; // Only use first matching trigger barcode
+        } else {
+          // SAME PRODUCT BOGO (e.g., buy 2 get 1 free of same item)
+          for (const tb of triggerBarcodes) {
+            const triggerItem = cartMap[tb];
+            if (!triggerItem) continue;
+            
+            let foundMatch = false;
+            for (const rb of rewardBarcodes) {
+              if (bogoRewardedBarcodes.has(rb)) continue;
+              const rewardItem = cartMap[rb];
+              if (!rewardItem) continue;
+              
+              if (tb === rb) {
+                // Same product: need minQty + rewardQty total
+                const totalPerSet = minQty + rewardQtyPerSet;
+                const totalAvail = triggerItem.quantity - (consumed[tb] || 0);
+                if (totalAvail < totalPerSet) continue;
+                
+                const maxPossibleSets = Math.floor(totalAvail / totalPerSet);
+                let actualSets = maxQty === 0 ? maxPossibleSets : Math.min(maxPossibleSets, maxQty);
+                if (actualSets <= 0) continue;
+                
+                const triggerQtyUsed = actualSets * minQty;
+                const freeQty = actualSets * rewardQtyPerSet;
+                
+                bogoRewardedBarcodes.add(rb);
+                sections.push({
+                  loyaltyId: loyalty.id || loyalty.name, loyaltyName: loyalty.name, type: 1, discountPercent: 0,
+                  triggerItems: [{ barcode: tb, name: triggerItem.name, price: triggerItem.price, quantity: triggerQtyUsed, lineTotal: triggerItem.price * triggerQtyUsed }],
+                  rewardItems: [{ barcode: rb, name: rewardItem.name, price: rewardItem.price, quantity: freeQty, freeQty, discountAmount: freeQty * rewardItem.price, lineTotal: 0 }],
+                  sectionSubtotal: triggerItem.price * triggerQtyUsed, totalDiscount: freeQty * rewardItem.price
+                });
+                consumed[tb] = (consumed[tb] || 0) + triggerQtyUsed + freeQty;
+                foundMatch = true;
+                break;
+              } else {
+                // Different product in same list (shouldn't happen with fixed sync, but just in case)
+                const triggerAvail = triggerItem.quantity - (consumed[tb] || 0);
+                if (triggerAvail < minQty) continue;
+                const availReward = rewardItem.quantity - (consumed[rb] || 0);
+                if (availReward < rewardQtyPerSet) continue;
+                
+                const maxSetsFromTrigger = Math.floor(triggerAvail / minQty);
+                const maxSetsFromReward = Math.floor(availReward / rewardQtyPerSet);
+                let maxPossibleSets = Math.min(maxSetsFromTrigger, maxSetsFromReward);
+                let actualSets = maxQty === 0 ? maxPossibleSets : Math.min(maxPossibleSets, maxQty);
+                if (actualSets <= 0) continue;
+                
+                const freeQty = actualSets * rewardQtyPerSet;
+                const triggerQtyUsed = actualSets * minQty;
+                
+                bogoRewardedBarcodes.add(rb);
+                sections.push({
+                  loyaltyId: loyalty.id || loyalty.name, loyaltyName: loyalty.name, type: 1, discountPercent: 0,
+                  triggerItems: [{ barcode: tb, name: triggerItem.name, price: triggerItem.price, quantity: triggerQtyUsed, lineTotal: triggerItem.price * triggerQtyUsed }],
+                  rewardItems: [{ barcode: rb, name: rewardItem.name, price: rewardItem.price, quantity: freeQty, freeQty, discountAmount: freeQty * rewardItem.price, lineTotal: 0 }],
+                  sectionSubtotal: triggerItem.price * triggerQtyUsed, totalDiscount: freeQty * rewardItem.price
+                });
+                consumed[tb] = (consumed[tb] || 0) + triggerQtyUsed;
+                consumed[rb] = (consumed[rb] || 0) + freeQty;
+                foundMatch = true;
+                break;
+              }
+            }
+            if (foundMatch) break;
+          }
         }
       }
     });
@@ -1211,35 +687,19 @@ const updateCustomerDisplay = () => {
   const calculateTotals = useCallback(() => {
     const { sections, remainingItems } = calculateLoyaltyBreakdown(cart);
     let subtotal = 0, totalDiscount = 0;
+    
     sections.forEach(sec => {
       sec.triggerItems.forEach(ti => { subtotal += ti.lineTotal; });
-      // Only count real reward items (not the virtual _group_discount_ placeholder)
       sec.rewardItems.filter(ri => ri.barcode !== '_group_discount_').forEach(ri => { subtotal += ri.price * ri.quantity; });
       totalDiscount += sec.totalDiscount;
     });
     remainingItems.forEach(item => { subtotal += item.itemSubtotal; });
 
-    let totalTax = 0;
-    const cartMap = {};
-    cart.forEach(item => { cartMap[item.barcode] = item; });
-    const barcodeNet = {};
-    sections.forEach(sec => {
-      // For fixed-discount sections, distribute the discount proportionally across trigger items
-      const sectionDiscount = sec.totalDiscount || 0;
-      const sectionGross = sec.triggerItems.reduce((s, ti) => s + ti.lineTotal, 0);
-      
-      sec.triggerItems.forEach(ti => { 
-        const itemShare = sectionGross > 0 ? (ti.lineTotal / sectionGross) * sectionDiscount : 0;
-        barcodeNet[ti.barcode] = (barcodeNet[ti.barcode] || 0) + ti.lineTotal - itemShare;
-      });
-      sec.rewardItems.filter(ri => ri.barcode !== '_group_discount_').forEach(ri => { 
-        barcodeNet[ri.barcode] = (barcodeNet[ri.barcode] || 0) + (ri.price * ri.quantity - ri.discountAmount); 
-      });
-    });
-    remainingItems.forEach(item => { barcodeNet[item.barcode] = (barcodeNet[item.barcode] || 0) + item.itemSubtotal; });
-    Object.keys(barcodeNet).forEach(bc => { totalTax += Math.max(0, barcodeNet[bc]) * (cartMap[bc]?.taxRate || 0); });
+    const netAmount = subtotal - totalDiscount;
+    const totalTax = netAmount * 0.15 / 1.15;
+    const total = netAmount;
 
-    return { subtotal, totalTax, totalDiscount, total: subtotal - totalDiscount + totalTax, sections, remainingItems };
+    return { subtotal, totalTax, totalDiscount, total, sections, remainingItems };
   }, [cart, calculateLoyaltyBreakdown]);
 
   const totals = calculateTotals();
@@ -1254,7 +714,6 @@ const updateCustomerDisplay = () => {
     const errors = { phone: '', vat: '' };
     let isValid = true;
 
-    // Phone is MANDATORY
     if (!customerInfo.phone || !customerInfo.phone.trim()) {
       errors.phone = 'Phone number is required';
       isValid = false;
@@ -1263,7 +722,6 @@ const updateCustomerDisplay = () => {
       isValid = false;
     }
 
-    // VAT validation only if checkbox is checked
     if (customerInfo.needsVat) {
       if (!customerInfo.vat || !customerInfo.vat.trim()) {
         errors.vat = 'VAT number is required when requesting tax invoice';
@@ -1291,10 +749,8 @@ const updateCustomerDisplay = () => {
       setLoading(true);
       const { sections } = calculateLoyaltyBreakdown(cart);
       
-      // Build a map of barcode -> { promotionName, isReward, discount }
       const promoMap = {};
       sections.forEach(sec => {
-        // For fixed-discount sections, distribute discount proportionally across trigger items
         const isFixedGroup = sec.rewardItems.some(ri => ri.barcode === '_group_discount_');
         if (isFixedGroup) {
           const sectionGross = sec.triggerItems.reduce((s, ti) => s + ti.lineTotal, 0);
@@ -1323,14 +779,13 @@ const updateCustomerDisplay = () => {
         return { barcode: cartItem.barcode, quantity: cartItem.quantity, price: cartItem.price, discount: pm.discount, promotionName: pm.promotionName, isReward: pm.isReward };
       });
 
-      // Build customer data - use phone as name if phone is provided
       let finalCustomerName = null;
       let finalCustomerPhone = null;
       let finalCustomerVat = null;
 
       if (customerInfo.phone && customerInfo.phone.trim()) {
         finalCustomerPhone = '+966' + customerInfo.phone.trim();
-        finalCustomerName = finalCustomerPhone; // Use phone as name
+        finalCustomerName = finalCustomerPhone;
       }
 
       if (customerInfo.vat && customerInfo.vat.trim()) {
@@ -1373,9 +828,7 @@ const updateCustomerDisplay = () => {
       console.error('Payment error:', error); 
       showMessage('Error processing payment'); 
     }
-    finally { 
-      setLoading(false); 
-    }
+    finally { setLoading(false); }
   };
 
   const handleFileImport = async (type, file) => { 
@@ -1397,12 +850,12 @@ const updateCustomerDisplay = () => {
   if (!session) {
     return (
       <div style={styles.app}>
-        <header style={styles.header}><div style={styles.logo}> {companyInfo.companyNameEn} POS</div></header>
+        <header style={styles.header}><div style={styles.logo}>🏪 {companyInfo.companyNameEn} POS</div></header>
         <main style={styles.main}>
           <div style={{ maxWidth: '400px', margin: '50px auto' }}>
             <div style={styles.panel}>
               <h2 style={{ textAlign: 'center', marginBottom: '30px' }}>Open Session</h2>
-              <div style={styles.infoBox}><strong> Note:</strong> If you already have an open session, you'll continue with it automatically.</div>
+              <div style={styles.infoBox}><strong>ℹ️ Note:</strong> If you already have an open session, you'll continue with it automatically.</div>
               <input type="text" placeholder="Cashier Name" value={cashierName} onChange={e => setCashierName(e.target.value)}
                 onKeyPress={e => e.key === 'Enter' && handleOpenSession()} style={styles.input} autoFocus />
               <input type="number" placeholder="Opening Cash (Optional)" value={openingCash} onChange={e => setOpeningCash(e.target.value)}
@@ -1421,11 +874,11 @@ const updateCustomerDisplay = () => {
   return (
     <div style={styles.app}>
       <header style={styles.header}>
-        <div style={styles.logo}> {companyInfo.companyNameEn} POS</div>
+        <div style={styles.logo}>🏪 {companyInfo.companyNameEn} POS</div>
         <div style={styles.sessionInfo}>
-          <span style={styles.badge}> {session.cashierName}</span>
+          <span style={styles.badge}>👤 {session.cashierName}</span>
           {isExistingSession && <span style={styles.badgeWarning}>🔄 Continuing Session</span>}
-          <span style={styles.badge}> {fc(session.totalSales)}</span>
+          <span style={styles.badge}>💰 {fc(session.totalSales)}</span>
           <button onClick={handleCloseSession} style={{ ...styles.button, ...styles.dangerBtn }}>Close Session</button>
         </div>
       </header>
@@ -1447,199 +900,200 @@ const updateCustomerDisplay = () => {
                 </button>
               ))}
               <button onClick={handleRefreshData} style={styles.refreshBtn} disabled={loading}>🔄 Refresh Data</button>
-              <button onClick={openCustomerDisplay} style={{ ...styles.button, ...styles.successBtn }}>🖥️ Customer Display</button>
             </div>
 
-             {activeTab === 'pos' && (
-          <div style={styles.posLayout}>
-            <div style={styles.panel}>
-              <input style={styles.input} placeholder="Scan barcode or enter product code..." value={barcode} onChange={e => setBarcode(e.target.value)} onKeyPress={e => e.key === 'Enter' && handleAddByBarcode()} autoFocus />
-              <div style={styles.productGrid}>
-                {products.map(product => (
-                  <div key={product.barcode} style={styles.productCard} onClick={() => addToCart(product)}
-                    onMouseEnter={e => { e.currentTarget.style.borderColor = '#2563eb'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
-                    onMouseLeave={e => { e.currentTarget.style.borderColor = '#e0e0e0'; e.currentTarget.style.transform = 'translateY(0)'; }}>
-                    <div style={{ fontSize: '32px', marginBottom: '8px' }}>{categoryEmojis[product.category] || categoryEmojis.default}</div>
-                    <div style={{ fontWeight: 'bold', fontSize: '14px', marginBottom: '5px' }}>{product.name}</div>
-                    <div style={{ color: '#2563eb', fontWeight: 'bold' }}>{fc(product.price)}</div>
-                    <div style={{ fontSize: '10px', color: '#999', marginTop: '5px' }}>#{product.barcode}</div>
+            {activeTab === 'pos' && (
+              <div style={styles.posLayout}>
+                <div style={styles.panel}>
+                  <input style={styles.input} placeholder="Scan barcode or enter product code..." value={barcode} onChange={e => setBarcode(e.target.value)} onKeyPress={e => e.key === 'Enter' && handleAddByBarcode()} autoFocus />
+                  <div style={{ textAlign: 'center', padding: '40px', color: '#999' }}>
+                    <div style={{ fontSize: '64px', marginBottom: '15px' }}>🔍</div>
+                    <p style={{ fontSize: '16px', marginBottom: '5px', fontWeight: 'bold' }}>Scan or Enter Barcode</p>
+                    <p style={{ fontSize: '13px', color: '#bbb' }}>Optimized for {products.length.toLocaleString()} products</p>
                   </div>
-                ))}
-              </div>
-            </div>
+                </div>
 
-            <div style={styles.panel}>
-              <h3 style={{ marginBottom: '20px', display: 'flex', justifyContent: 'space-between' }}>
-                <span>Shopping Cart</span>
-                {cart.length > 0 && <span style={{ ...styles.badge, background: '#2563eb' }}>{cart.length} items</span>}
-              </h3>
+                <div style={styles.panel}>
+                  <h3 style={{ marginBottom: '20px', display: 'flex', justifyContent: 'space-between' }}>
+                    <span>Shopping Cart</span>
+                    {cart.length > 0 && <span style={{ ...styles.badge, background: '#2563eb' }}>{cart.length} items</span>}
+                  </h3>
 
-              {cart.length === 0 ? (
-                <div style={{ textAlign: 'center', padding: '40px', color: '#999' }}><p>Cart is empty</p></div>
-              ) : (
-                <>
-                  <div style={{ maxHeight: '450px', overflowY: 'auto' }}>
-                    <div style={{ marginBottom: '10px', padding: '8px', background: '#f0f4ff', borderRadius: '8px', fontSize: '12px' }}>
-                      {cart.map(item => (
-                        <div key={item.barcode} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '5px 0', borderBottom: '1px solid #e8ecf0' }}>
-                          <span style={{ fontWeight: 'bold', flex: 1 }}>{item.name}</span>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                            <button style={{ ...styles.qtyBtn, width: '24px', height: '24px', fontSize: '14px' }} onClick={() => updateQuantity(item.barcode, -1)}>−</button>
-                            <span style={{ minWidth: '20px', textAlign: 'center', fontWeight: 'bold' }}>{item.quantity}</span>
-                            <button style={{ ...styles.qtyBtn, width: '24px', height: '24px', fontSize: '14px' }} onClick={() => updateQuantity(item.barcode, 1)}>+</button>
-                            <button style={{ background: 'transparent', border: 'none', color: '#dc3545', cursor: 'pointer', fontSize: '11px', padding: '2px 5px' }} onClick={() => removeFromCart(item.barcode)}>Remove</button>
-                          </div>
+                  {cart.length === 0 ? (
+                    <div style={{ textAlign: 'center', padding: '40px', color: '#999' }}><p>Cart is empty</p></div>
+                  ) : (
+                    <>
+                      <div style={{ maxHeight: '450px', overflowY: 'auto' }}>
+                        <div style={{ marginBottom: '10px', padding: '8px', background: '#f0f4ff', borderRadius: '8px', fontSize: '12px' }}>
+                          {cart.map(item => (
+                            <div key={item.barcode} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '5px 0', borderBottom: '1px solid #e8ecf0' }}>
+                              <span style={{ fontWeight: 'bold', flex: 1 }}>{item.name}</span>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                <button style={{ ...styles.qtyBtn, width: '24px', height: '24px', fontSize: '14px' }} onClick={() => updateQuantity(item.barcode, -1)}>−</button>
+                                <span style={{ minWidth: '20px', textAlign: 'center', fontWeight: 'bold' }}>{item.quantity}</span>
+                                <button style={{ ...styles.qtyBtn, width: '24px', height: '24px', fontSize: '14px' }} onClick={() => updateQuantity(item.barcode, 1)}>+</button>
+                                <button style={{ background: 'transparent', border: 'none', color: '#dc3545', cursor: 'pointer', fontSize: '11px', padding: '2px 5px' }} onClick={() => removeFromCart(item.barcode)}>Remove</button>
+                              </div>
+                            </div>
+                          ))}
                         </div>
-                      ))}
-                    </div>
 
-                    {hasUnresolvedConflicts() && (
-                      <div style={{ 
-                        background: 'rgba(255, 193, 7, 0.2)', 
-                        border: '2px solid #ffc107', 
-                        borderRadius: '10px', 
-                        padding: '12px', 
-                        marginBottom: '10px',
-                        textAlign: 'center'
-                      }}>
-                        <div style={{ fontWeight: 'bold', color: '#856404', marginBottom: '5px' }}>⚠️ Action Required</div>
-                        <div style={{ fontSize: '12px', color: '#856404' }}>Multiple FREE item promotions - please select one</div>
-                      </div>
-                    )}
-
-                    <div style={{ borderTop: '2px solid #333', paddingTop: '8px' }}>
-                      {totals.sections.map((sec, idx) => (
-                        <div key={idx} style={{ marginBottom: '10px', paddingBottom: '8px', borderBottom: '1px dashed #bbb' }}>
-                          <div style={{ fontWeight: 'bold', fontSize: '13px', color: '#333', marginBottom: '4px' }}>{sec.loyaltyName}</div>
-                          <div style={{ fontSize: '11px', color: '#555', marginBottom: '5px' }}>
-                            {sec.type === 1 
-                              ? `Buy ${sec.triggerItems[0]?.quantity || 0} Get ${sec.rewardItems[0]?.freeQty || 0} Free / اشتر واحصل مجاناً` 
-                              : sec.afterDiscount 
-                                ? `${sec.triggerItems.reduce((s, ti) => s + ti.quantity, 0)} for ${fc(sec.afterDiscount)} / ${sec.triggerItems.reduce((s, ti) => s + ti.quantity, 0)} بـ ${fc(sec.afterDiscount)}`
-                                : `${sec.discountPercent}% Off / ${sec.discountPercent}% خصم`}
+                        {hasUnresolvedConflicts() && (
+                          <div style={{ 
+                            background: 'rgba(255, 193, 7, 0.2)', 
+                            border: '2px solid #ffc107', 
+                            borderRadius: '10px', 
+                            padding: '12px', 
+                            marginBottom: '10px',
+                            textAlign: 'center'
+                          }}>
+                            <div style={{ fontWeight: 'bold', color: '#856404', marginBottom: '5px' }}>⚠️ Action Required</div>
+                            <div style={{ fontSize: '12px', color: '#856404' }}>Multiple FREE item promotions - please select one</div>
                           </div>
-                          {sec.triggerItems.map((ti, i) => (
-                            <div key={`t${i}`} style={{ display: 'flex', justifyContent: 'space-between', padding: '2px 8px', fontSize: '12px', color: '#333' }}>
-                              <span>{ti.loyaltyLabel || ti.name} x {ti.quantity}</span>
-                              <span>{ti.afterDiscountPrice ? fc(ti.afterDiscountPrice * ti.quantity) : fc(ti.lineTotal)}</span>
+                        )}
+
+                        <div style={{ borderTop: '2px solid #333', paddingTop: '8px' }}>
+                          {totals.sections.map((sec, idx) => (
+                            <div key={idx} style={{ marginBottom: '10px', paddingBottom: '8px', borderBottom: '1px dashed #bbb' }}>
+                              <div style={{ fontWeight: 'bold', fontSize: '13px', color: '#333', marginBottom: '4px' }}>{sec.loyaltyName}</div>
+                              <div style={{ fontSize: '11px', color: '#555', marginBottom: '5px' }}>
+                                {sec.type === 1 
+                                  ? `Buy ${sec.triggerItems[0]?.quantity || 0} Get ${sec.rewardItems[0]?.freeQty || 0} Free / اشتر واحصل مجاناً` 
+                                  : sec.afterDiscount 
+                                    ? `${sec.triggerItems.reduce((s, ti) => s + ti.quantity, 0)} for ${fc(sec.afterDiscount)} / ${sec.triggerItems.reduce((s, ti) => s + ti.quantity, 0)} بـ ${fc(sec.afterDiscount)}`
+                                    : `${sec.discountPercent}% Off / ${sec.discountPercent}% خصم`}
+                              </div>
+                              {sec.triggerItems.map((ti, i) => (
+                                <div key={`t${i}`} style={{ display: 'flex', justifyContent: 'space-between', padding: '2px 8px', fontSize: '12px', color: '#333' }}>
+                                  <span>{ti.loyaltyLabel || ti.name} x {ti.quantity}</span>
+                                  <span>{ti.afterDiscountPrice ? fc(ti.afterDiscountPrice * ti.quantity) : fc(ti.lineTotal)}</span>
+                                </div>
+                              ))}
+                              {sec.rewardItems.filter(ri => ri.barcode !== '_group_discount_').map((ri, i) => (
+                                <div key={`r${i}`} style={{ display: 'flex', justifyContent: 'space-between', padding: '2px 8px', fontSize: '12px', color: '#333' }}>
+                                  <span>{ri.name} x {ri.quantity}</span><span>{sec.type === 1 ? fc(0) : fc(ri.lineTotal)}</span>
+                                </div>
+                              ))}
+                              {sec.type === 0 && sec.totalDiscount > 0 && !sec.afterDiscount && (
+                                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '2px 8px', fontSize: '12px', color: '#28a745', fontWeight: 'bold' }}>
+                                  <span>💚 Discount</span><span>{fcNeg(sec.totalDiscount)}</span>
+                                </div>
+                              )}
+                              <div style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 8px', fontSize: '12px', fontWeight: 'bold', color: '#333', borderTop: '1px solid #ddd', marginTop: '3px' }}>
+                                <span>Subtotal</span><span>{fc(sec.sectionSubtotal)}</span>
+                              </div>
                             </div>
                           ))}
-                          {sec.rewardItems.filter(ri => ri.barcode !== '_group_discount_').map((ri, i) => (
-                            <div key={`r${i}`} style={{ display: 'flex', justifyContent: 'space-between', padding: '2px 8px', fontSize: '12px', color: '#333' }}>
-                              <span>{ri.name} x {ri.quantity}</span><span>{sec.type === 1 ? fc(0) : fc(ri.lineTotal)}</span>
-                            </div>
-                          ))}
-                          {sec.type === 0 && sec.totalDiscount > 0 && !sec.afterDiscount && (
-                            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '2px 8px', fontSize: '12px', color: '#28a745', fontWeight: 'bold' }}>
-                              <span>💚 Discount</span><span>{fcNeg(sec.totalDiscount)}</span>
+
+                          {totals.remainingItems.length > 0 && (
+                            <div style={{ marginBottom: '10px', paddingBottom: '8px', borderBottom: '1px dashed #bbb' }}>
+                              {totals.sections.length > 0 && <div style={{ fontWeight: 'bold', fontSize: '13px', color: '#333', marginBottom: '4px' }}>Other Items</div>}
+                              {totals.remainingItems.map((item, idx) => (
+                                <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', padding: '2px 8px', fontSize: '12px', color: '#333' }}>
+                                  <span>{item.name} x {item.quantity}</span><span>{fc(item.itemSubtotal)}</span>
+                                </div>
+                              ))}
                             </div>
                           )}
-                          <div style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 8px', fontSize: '12px', fontWeight: 'bold', color: '#333', borderTop: '1px solid #ddd', marginTop: '3px' }}>
-                            <span>Subtotal</span><span>{fc(sec.sectionSubtotal)}</span>
-                          </div>
                         </div>
-                      ))}
-
-                      {totals.remainingItems.length > 0 && (
-                        <div style={{ marginBottom: '10px', paddingBottom: '8px', borderBottom: '1px dashed #bbb' }}>
-                          {totals.sections.length > 0 && <div style={{ fontWeight: 'bold', fontSize: '13px', color: '#333', marginBottom: '4px' }}>Other Items</div>}
-                          {totals.remainingItems.map((item, idx) => (
-                            <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', padding: '2px 8px', fontSize: '12px', color: '#333' }}>
-                              <span>{item.name} x {item.quantity}</span><span>{fc(item.itemSubtotal)}</span>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  <div style={{ borderTop: '2px solid #333', paddingTop: '10px', marginTop: '8px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px', fontSize: '14px' }}>
-                      <span>Subtotal</span><span>{fc(totals.subtotal)}</span>
-                    </div>
-                    {totals.totalDiscount > 0 && (
-                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px', fontSize: '14px', color: '#333' }}>
-                        <span>Discount</span><span>{fcNeg(totals.totalDiscount)}</span>
                       </div>
-                    )}
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px', fontSize: '14px', color: '#666' }}>
-                      <span>Tax</span><span>{fc(totals.totalTax)}</span>
-                    </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '20px', fontWeight: 'bold', color: '#2563eb', paddingTop: '8px', borderTop: '2px solid #333' }}>
-                      <span>Total</span><span>{fc(totals.total)}</span>
-                    </div>
-                  </div>
 
-                  <button
-                    style={{ 
-                      ...styles.button, 
-                      ...styles.primaryBtn, 
-                      width: '100%', 
-                      marginTop: '15px', 
-                      padding: '15px', 
-                      fontSize: '16px', 
-                      ...(hasUnresolvedConflicts() ? { background: '#ffc107', color: '#000' } : {}) 
-                    }}
-                    onClick={() => {
-                      if (hasUnresolvedConflicts()) { 
-                        const c = detectConflicts(cart); 
-                        for (const x of c) { 
-                          if (!selectionsRef.current[x.conflictKey]) { 
-                            setShowConflictModal(x); 
-                            return; 
-                          } 
-                        } 
-                      }
-                      else handleCheckout();
-                    }} 
-                    disabled={loading}>
-                    {hasUnresolvedConflicts() ? '⚠️ Select FREE Item First' : 'Proceed to Payment'}
-                  </button>
-                </>
-              )}
-            </div>
-          </div>
-        )}
+                      <div style={{ borderTop: '2px solid #333', paddingTop: '10px', marginTop: '8px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px', fontSize: '14px' }}>
+                          <span>Subtotal</span><span>{fc(totals.subtotal)}</span>
+                        </div>
+                        {totals.totalDiscount > 0 && (
+                          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px', fontSize: '14px', color: '#333' }}>
+                            <span>Discount</span><span>{fcNeg(totals.totalDiscount)}</span>
+                          </div>
+                        )}
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px', fontSize: '14px', color: '#666' }}>
+                          <span>Tax</span><span>{fc(totals.totalTax)}</span>
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '20px', fontWeight: 'bold', color: '#2563eb', paddingTop: '8px', borderTop: '2px solid #333' }}>
+                          <span>Total</span><span>{fc(totals.total)}</span>
+                        </div>
+                      </div>
 
-        {activeTab === 'products' && (
-          <div style={styles.panel}>
-            <h3 style={{ marginBottom: '20px' }}>Products ({products.length})</h3>
-            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-              <thead><tr style={{ background: '#f8f9fa' }}>
-                <th style={{ padding: '12px', textAlign: 'left', borderBottom: '2px solid #e0e0e0' }}>Barcode</th>
-                <th style={{ padding: '12px', textAlign: 'left', borderBottom: '2px solid #e0e0e0' }}>Name</th>
-                <th style={{ padding: '12px', textAlign: 'left', borderBottom: '2px solid #e0e0e0' }}>Category</th>
-                <th style={{ padding: '12px', textAlign: 'right', borderBottom: '2px solid #e0e0e0' }}>Price</th>
-                <th style={{ padding: '12px', textAlign: 'right', borderBottom: '2px solid #e0e0e0' }}>Tax</th>
-              </tr></thead>
-              <tbody>{products.map(p => (
-                <tr key={p.barcode} style={{ borderBottom: '1px solid #e0e0e0' }}>
-                  <td style={{ padding: '12px' }}><code style={{ background: '#f0f0f0', padding: '3px 8px', borderRadius: '4px' }}>{p.barcode}</code></td>
-                  <td style={{ padding: '12px' }}>{p.name}</td>
-                  <td style={{ padding: '12px' }}><span style={{ background: '#e0e7ff', color: '#2563eb', padding: '3px 10px', borderRadius: '15px', fontSize: '12px' }}>{p.category}</span></td>
-                  <td style={{ padding: '12px', textAlign: 'right', fontWeight: 'bold', color: '#2563eb' }}>{fc(p.price)}</td>
-                  <td style={{ padding: '12px', textAlign: 'right', color: '#666' }}>{((p.taxRate || 0) * 100).toFixed(0)}%</td>
-                </tr>
-              ))}</tbody>
-            </table>
-          </div>
-        )}
-
-        {activeTab === 'import' && (
-          <div style={styles.panel}>
-            <h3 style={{ marginBottom: '20px' }}>Import Data from Excel</h3>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
-              {[{ type: 'products', label: 'Import Products' }, { type: 'loyalty', label: 'Import Loyalty Programs' }].map(({ type, label }) => (
-                <div key={type} style={{ padding: '30px', border: '2px dashed #e0e0e0', borderRadius: '15px', textAlign: 'center' }}>
-                  <h4>{label}</h4>
-                  <p style={{ color: '#666', marginBottom: '15px' }}>{type === 'loyalty' ? 'Upload CSV or Excel file (.csv, .xlsx)' : 'Upload Excel file (.xlsx)'}</p>
-                  <input type="file" accept={type === 'loyalty' ? '.xlsx,.xls,.csv' : '.xlsx,.xls'} onChange={e => e.target.files[0] && handleFileImport(type, e.target.files[0])} style={{ display: 'none' }} id={`${type}File`} />
-                  <label htmlFor={`${type}File`} style={{ ...styles.button, ...styles.primaryBtn, cursor: 'pointer', display: 'inline-block' }}>Select File</label>
+                      <button
+                        style={{ 
+                          ...styles.button, 
+                          ...styles.primaryBtn, 
+                          width: '100%', 
+                          marginTop: '15px', 
+                          padding: '15px', 
+                          fontSize: '16px', 
+                          ...(hasUnresolvedConflicts() ? { background: '#ffc107', color: '#000' } : {}) 
+                        }}
+                        onClick={() => {
+                          if (hasUnresolvedConflicts()) { 
+                            const c = detectConflicts(cart); 
+                            for (const x of c) { 
+                              if (!selectionsRef.current[x.conflictKey]) { 
+                                setShowConflictModal(x); 
+                                return; 
+                              } 
+                            } 
+                          }
+                          else handleCheckout();
+                        }} 
+                        disabled={loading}>
+                        {hasUnresolvedConflicts() ? '⚠️ Select FREE Item First' : 'Proceed to Payment'}
+                      </button>
+                    </>
+                  )}
                 </div>
-              ))}
-            </div>
-          </div>
-        )}
+              </div>
+            )}
+
+            {activeTab === 'products' && (
+              <div style={styles.panel}>
+                <h3 style={{ marginBottom: '20px' }}>Products ({products.length.toLocaleString()})</h3>
+                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                  <thead><tr style={{ background: '#f8f9fa' }}>
+                    <th style={{ padding: '12px', textAlign: 'left', borderBottom: '2px solid #e0e0e0' }}>Barcode</th>
+                    <th style={{ padding: '12px', textAlign: 'left', borderBottom: '2px solid #e0e0e0' }}>Name</th>
+                    <th style={{ padding: '12px', textAlign: 'left', borderBottom: '2px solid #e0e0e0' }}>Category</th>
+                    <th style={{ padding: '12px', textAlign: 'right', borderBottom: '2px solid #e0e0e0' }}>Price</th>
+                    <th style={{ padding: '12px', textAlign: 'right', borderBottom: '2px solid #e0e0e0' }}>Tax</th>
+                  </tr></thead>
+                  <tbody>
+                    {products.slice(0, 100).map(p => (
+                      <tr key={p.barcode} style={{ borderBottom: '1px solid #e0e0e0' }}>
+                        <td style={{ padding: '12px' }}><code style={{ background: '#f0f0f0', padding: '3px 8px', borderRadius: '4px' }}>{p.barcode}</code></td>
+                        <td style={{ padding: '12px' }}>{p.name}</td>
+                        <td style={{ padding: '12px' }}><span style={{ background: '#e0e7ff', color: '#2563eb', padding: '3px 10px', borderRadius: '15px', fontSize: '12px' }}>{p.category}</span></td>
+                        <td style={{ padding: '12px', textAlign: 'right', fontWeight: 'bold', color: '#2563eb' }}>{fc(p.price)}</td>
+                        <td style={{ padding: '12px', textAlign: 'right', color: '#666' }}>{((p.taxRate || 0) * 100).toFixed(0)}%</td>
+                      </tr>
+                    ))}
+                    {products.length > 100 && (
+                      <tr>
+                        <td colSpan="5" style={{ padding: '20px', textAlign: 'center', color: '#999', fontStyle: 'italic' }}>
+                          Showing first 100 products. Use barcode scanner to find specific products.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            )}
+
+            {activeTab === 'import' && (
+              <div style={styles.panel}>
+                <h3 style={{ marginBottom: '20px' }}>Import Data from Excel</h3>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                  {[{ type: 'products', label: 'Import Products' }, { type: 'loyalty', label: 'Import Loyalty Programs' }].map(({ type, label }) => (
+                    <div key={type} style={{ padding: '30px', border: '2px dashed #e0e0e0', borderRadius: '15px', textAlign: 'center' }}>
+                      <h4>{label}</h4>
+                      <p style={{ color: '#666', marginBottom: '15px' }}>{type === 'loyalty' ? 'Upload CSV or Excel file (.csv, .xlsx)' : 'Upload Excel file (.xlsx)'}</p>
+                      <input type="file" accept={type === 'loyalty' ? '.xlsx,.xls,.csv' : '.xlsx,.xls'} onChange={e => e.target.files[0] && handleFileImport(type, e.target.files[0])} style={{ display: 'none' }} id={`${type}File`} />
+                      <label htmlFor={`${type}File`} style={{ ...styles.button, ...styles.primaryBtn, cursor: 'pointer', display: 'inline-block' }}>Select File</label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </>
         )}
       </main>
@@ -1652,7 +1106,6 @@ const updateCustomerDisplay = () => {
               معلومات العميل / Required
             </p>
 
-            {/* Phone Number with +966 prefix - MANDATORY */}
             <div style={styles.phoneInputContainer}>
               <div style={styles.phonePrefix}>+966</div>
               <input
@@ -1680,7 +1133,6 @@ const updateCustomerDisplay = () => {
               <div style={styles.errorText}>⚠️ {validationErrors.phone}</div>
             )}
 
-            {/* VAT Checkbox */}
             <div
               style={styles.checkboxContainer}
               onClick={() => {
@@ -1688,7 +1140,7 @@ const updateCustomerDisplay = () => {
                 setCustomerInfo({ 
                   ...customerInfo, 
                   needsVat: newNeedsVat,
-                  vat: newNeedsVat ? customerInfo.vat : '' // Clear VAT if unchecked
+                  vat: newNeedsVat ? customerInfo.vat : ''
                 });
                 if (!newNeedsVat) {
                   setValidationErrors({ ...validationErrors, vat: '' });
@@ -1702,11 +1154,10 @@ const updateCustomerDisplay = () => {
                 style={styles.checkbox}
               />
               <label style={{ cursor: 'pointer', fontSize: '14px', fontWeight: 'bold' }}>
-                 Request Tax Invoice (VAT) / طلب فاتورة ضريبية
+                🧾 Request Tax Invoice (VAT) / طلب فاتورة ضريبية
               </label>
             </div>
 
-            {/* VAT Number input - Only shown when checkbox is checked */}
             {customerInfo.needsVat && (
               <>
                 <input
@@ -1738,7 +1189,7 @@ const updateCustomerDisplay = () => {
                   fontSize: '12px', 
                   color: '#1565c0' 
                 }}>
-                  <strong> Note:</strong> Tax Invoice requires valid 15-digit Saudi VAT number
+                  <strong>ℹ️ Note:</strong> Tax Invoice requires valid 15-digit Saudi VAT number
                   <br />
                   <strong>ملاحظة:</strong> الفاتورة الضريبية تتطلب رقم ضريبي سعودي صحيح من 15 رقم
                 </div>
@@ -1785,7 +1236,7 @@ const updateCustomerDisplay = () => {
       {showConflictModal && (
         <div style={styles.modal}>
           <div style={styles.modalContent} onClick={e => e.stopPropagation()}>
-            <h3 style={{ textAlign: 'center', marginBottom: '10px', color: '#333', fontSize: '22px' }}> Choose FREE Item</h3>
+            <h3 style={{ textAlign: 'center', marginBottom: '10px', color: '#333', fontSize: '22px' }}>🎁 Choose FREE Item</h3>
             <p style={{ textAlign: 'center', color: '#666', marginBottom: '8px', fontSize: '14px' }}>
               Multiple FREE item promotions for <strong>{showConflictModal.triggerProduct}</strong>
             </p>
@@ -1799,7 +1250,7 @@ const updateCustomerDisplay = () => {
                   onClick={() => handleConflictSelect(showConflictModal.conflictKey, opt.loyaltyId)}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
                     <div style={{ flex: 1 }}>
-                      <div style={{ fontWeight: 'bold', fontSize: '15px', color: '#333', marginBottom: '4px' }}> {opt.loyaltyName}</div>
+                      <div style={{ fontWeight: 'bold', fontSize: '15px', color: '#333', marginBottom: '4px' }}>🎁 {opt.loyaltyName}</div>
                       <div style={{ fontSize: '13px', color: '#28a745', marginBottom: '6px', fontWeight: 'bold' }}>Get FREE: {opt.rewardProducts.map(rp => rp.name).join(', ')}</div>
                       <div style={{ fontSize: '12px', color: '#888' }}>Value: {opt.rewardProducts.map(rp => fc(rp.price)).join(', ')}</div>
                     </div>

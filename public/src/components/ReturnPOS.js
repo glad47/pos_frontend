@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { printReceipt } from './receiptPrinter';
 
-const API_URL = 'http://localhost:8080/api';
+const API_URL = '/api';
 
 const fc = (amount) => `${amount.toFixed(2)} ﷼`;
 

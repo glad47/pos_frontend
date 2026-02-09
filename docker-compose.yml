@@ -1,0 +1,29 @@
+version: '3.9'
+services:
+  mysql:
+    image: glad47/mysql:01
+    container_name: mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      # MYSQL_DATABASE: rouyi
+    ports:
+      - "3306:3306"
+    volumes:
+      - "/var/lib/mysql/:/var/lib/mysql"
+ 
+  pos_backend:
+    image: glad47/pos_backend:03
+    container_name: pos_backend
+    restart: always
+    depends_on:
+      - mysql  
+ 
+  pos_frontend:
+    image: glad47/pos_frontend:02
+    container_name: pos_frontend
+    restart: always
+    depends_on:
+      - pos_backend
+    ports:
+      - "80:80"
