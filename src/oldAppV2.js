@@ -1,11 +1,8 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { productApi, loyaltyApi, sessionApi, orderApi, employeeApi } from './services/api';
+import { productApi, loyaltyApi, sessionApi, orderApi } from './services/api';
 import OrderComplete from './components/OrderComplete';
 import ReturnPOS from './components/ReturnPOS';
-import Login from './components/Login';
-import ManagerDashboard from './components/ManagerDashboardComp';
 
-// PRESERVED: All original styles from your working POS
 const styles = {
   app: { minHeight: '100vh', background: '#f5f7fa', fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif", color: '#333' },
   header: { background: '#fff', padding: '15px 30px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #e0e0e0', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' },
@@ -17,7 +14,6 @@ const styles = {
   posTypeSelector: { display: 'flex', gap: '15px', marginBottom: '20px', justifyContent: 'center' },
   posTypeTab: { padding: '15px 40px', borderRadius: '12px', border: '2px solid #e0e0e0', cursor: 'pointer', fontWeight: 'bold', fontSize: '16px', background: '#fff', color: '#666', transition: 'all 0.3s', boxShadow: '0 2px 6px rgba(0,0,0,0.08)' },
   posTypeTabActive: { background: '#2563eb', color: '#fff', borderColor: '#2563eb', transform: 'translateY(-2px)', boxShadow: '0 4px 12px rgba(37,99,235,0.3)' },
-  posTypeTabDisabled: { opacity: 0.5, cursor: 'not-allowed', background: '#f0f0f0' },
   posLayout: { display: 'grid', gridTemplateColumns: '1fr 450px', gap: '20px' },
   tabs: { display: 'flex', gap: '10px', marginBottom: '20px' },
   tab: { padding: '12px 25px', borderRadius: '10px', border: 'none', cursor: 'pointer', fontWeight: 'bold', fontSize: '14px', background: '#fff', color: '#666', transition: 'all 0.3s', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' },
@@ -34,7 +30,6 @@ const styles = {
   toast: { position: 'fixed', bottom: '30px', left: '50%', transform: 'translateX(-50%)', padding: '15px 30px', borderRadius: '10px', background: '#333', color: '#fff', fontWeight: 'bold', zIndex: 2000 },
   refreshBtn: { padding: '10px 20px', borderRadius: '8px', border: 'none', background: '#28a745', color: '#fff', cursor: 'pointer', fontWeight: 'bold', fontSize: '14px', display: 'flex', alignItems: 'center', gap: '8px' },
   infoBox: { background: '#fff3cd', border: '2px solid #ffc107', borderRadius: '10px', padding: '15px', marginBottom: '15px', fontSize: '14px' },
-  warningBox: { background: '#fff3cd', border: '2px solid #ffc107', borderRadius: '10px', padding: '15px', marginBottom: '15px', fontSize: '14px' },
   errorText: { color: '#dc3545', fontSize: '12px', marginTop: '-10px', marginBottom: '10px', paddingLeft: '5px', fontWeight: 'bold' },
   inputError: { borderColor: '#dc3545' },
   checkboxContainer: { display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '15px', padding: '12px', background: '#f8f9fa', borderRadius: '10px', cursor: 'pointer' },
@@ -57,11 +52,6 @@ const validateSaudiVAT = (vat) => {
 };
 
 function App() {
-  // NEW: Authentication state
-  const [currentEmployee, setCurrentEmployee] = useState(null);
-  const [selectedSessionToManage, setSelectedSessionToManage] = useState(null);
-
-  // PRESERVED: All original POS state
   const [session, setSession] = useState(null);
   const [cashierName, setCashierName] = useState('');
   const [openingCash, setOpeningCash] = useState('');
@@ -100,9 +90,6 @@ function App() {
     country: 'Saudi Arabia' 
   };
 
-  // PRESERVED: All original functions
-  const showMessage = (msg) => { setMessage(msg); setTimeout(() => setMessage(''), 3000); };
-
   const loadData = useCallback(async () => {
     try {
       const [prodRes, loyRes] = await Promise.all([productApi.getAll(), loyaltyApi.getActive()]);
@@ -116,92 +103,16 @@ function App() {
     }
   }, []);
 
-  useEffect(() => { if (currentEmployee) loadData(); }, [currentEmployee, loadData]);
+  useEffect(() => { loadData(); }, [loadData]);
 
-  // Send cart and totals updates to customer display window
-  useEffect(() => {
-    if (customerDisplayWindow && !customerDisplayWindow.closed) {
-      try {
-        const currentTotals = calculateTotals();
-        customerDisplayWindow.postMessage({
-          type: 'UPDATE_ALL',
-          data: {
-            cart,
-            totals: currentTotals,
-            companyInfo
-          }
-        }, window.location.origin);
-      } catch (err) {
-        console.log('Could not send to customer display:', err);
-      }
-    }
-  }, [cart, customerDisplayWindow, companyInfo]);
+  const showMessage = (msg) => { setMessage(msg); setTimeout(() => setMessage(''), 3000); };
 
-  // NEW: Employee login handler
-  const handleLogin = async (employeeId, pin) => {
-    try {
-      const response = await employeeApi.login({ employeeId, pin });
-      if (response.data.success) {
-        setCurrentEmployee(response.data.employee);
-        setCashierName(response.data.employee.name);
-        showMessage(`Welcome ${response.data.employee.name}!`);
-      } else {
-        throw new Error(response.data.message || 'Login failed');
-      }
-    } catch (error) {
-      throw new Error(error.response?.data?.message || 'Login failed. Check credentials.');
-    }
-  };
-
-  // NEW: Logout handler
-  const handleLogout = () => {
-    if (customerDisplayWindow && !customerDisplayWindow.closed) {
-      customerDisplayWindow.close();
-    }
-    setCurrentEmployee(null);
-    setSession(null);
-    setSelectedSessionToManage(null);
-    setCart([]);
-    setCashierName('');
-    showMessage('Logged out successfully');
-  };
-
-  // NEW: Manager selects a session to manage
-  const handleSelectSession = (selectedSession) => {
-    setSelectedSessionToManage(selectedSession);
-    setSession(selectedSession);
-    setCashierName(selectedSession.cashierName);
-  };
-
-  // NEW: Open new session for manager
-  const handleOpenNewSession = async () => {
-    if (!currentEmployee) return;
-    try {
-      setLoading(true);
-      const response = await sessionApi.open({ 
-        cashierName: currentEmployee.name,
-        employeeId: currentEmployee.employeeId,
-        openingCash: 0 
-      });
-      const sessionData = response.data.session || response.data;
-      setSession(sessionData);
-      setCashierName(currentEmployee.name);
-      showMessage('Session opened successfully');
-    } catch (error) {
-      showMessage('Error opening session');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // PRESERVED: Original session opening
   const handleOpenSession = async () => {
     if (!cashierName.trim()) { showMessage('Please enter your name'); return; }
     try { 
       setLoading(true); 
       const response = await sessionApi.open({ 
-        cashierName: cashierName.trim(),
-        employeeId: currentEmployee?.employeeId || null,
+        cashierName: cashierName.trim(), 
         openingCash: parseFloat(openingCash) || 0 
       }); 
       const isExisting = response.data.isExistingSession || false;
@@ -221,16 +132,8 @@ function App() {
     finally { setLoading(false); }
   };
 
-  // MODIFIED: Only managers can close sessions
   const handleCloseSession = async () => {
-    if (!session || !currentEmployee) return;
-    
-    // Check if user is manager
-    if (!currentEmployee.managerUser) {
-      showMessage('Only managers can close sessions');
-      return;
-    }
-
+    if (!session) return;
     if (customerDisplayWindow && !customerDisplayWindow.closed) {
       customerDisplayWindow.close();
     }
@@ -239,12 +142,12 @@ function App() {
       await sessionApi.close(session.id, { closingCash: 0, notes: '' }); 
       setSession(null); 
       setCart([]); 
+      setCashierName(''); 
       setOpeningCash(''); 
       setLoyaltySelections({});
       setCustomerInfo({ name: '', phone: '', vat: '', needsVat: false });
       setValidationErrors({ phone: '', vat: '' });
       setIsExistingSession(false);
-      setSelectedSessionToManage(null);
       showMessage('Session closed successfully');
     }
     catch (e) { showMessage('Error closing session'); } 
@@ -281,7 +184,6 @@ function App() {
 
   const removeFromCart = (bcode) => { setCart(prev => prev.filter(i => i.barcode !== bcode)); };
 
-  // PRESERVED: All original loyalty detection and calculation logic (UNCHANGED)
   const detectConflicts = useCallback((cartItems) => {
     const cartMap = {};
     cartItems.forEach(item => { cartMap[item.barcode] = item; });
@@ -310,6 +212,7 @@ function App() {
       const minQty = loyalty.minQuantity;
       const rewardQtyPerSet = loyalty.rewardQuantity;
 
+      // Step 1: Check if trigger and reward lists are already different (fixed sync data)
       const triggerSet = new Set(triggerBarcodes);
       const rewardSet = new Set(rewardBarcodes);
       const listsAreDifferent = triggerBarcodes.length !== rewardBarcodes.length ||
@@ -321,8 +224,10 @@ function App() {
       let hasDistinctRewards = false;
 
       if (listsAreDifferent) {
+        // Data already has separate trigger/reward from fixed sync
         hasDistinctRewards = true;
       } else if (afterDiscount > 0) {
+        // Step 2: Legacy fallback — use after_discount price to identify real trigger
         const productPriceMap = {};
         products.forEach(p => { if (p.barcode) productPriceMap[p.barcode] = p.price; });
         Object.keys(cartMap).forEach(bc => { if (!productPriceMap[bc]) productPriceMap[bc] = cartMap[bc].price; });
@@ -340,6 +245,7 @@ function App() {
         }
       }
 
+      // Step 3: If still no distinct rewards, treat as same-product BOGO
       if (!hasDistinctRewards) {
         realRewardBarcodes = rewardBarcodes;
       }
@@ -437,7 +343,6 @@ function App() {
   };
 
   const calculateLoyaltyBreakdown = useCallback((cartItems) => {
-    // PRESERVED: COMPLETE ORIGINAL LOYALTY CALCULATION LOGIC - NOT MODIFIED
     const cartMap = {};
     cartItems.forEach(item => { cartMap[item.barcode] = { ...item }; });
     const bogoRewardedBarcodes = new Set();
@@ -528,6 +433,8 @@ function App() {
           sectionTriggerItems.push({
             barcode: e.barcode, name: e.name, price: e.price,
             quantity: take, lineTotal: lineTotal,
+            // FIX 1c: afterDiscount is the SET total (e.g., 10.95 for 8 items)
+            // For per-item display, divide by minQty
             afterDiscountPrice: afterDiscount > 0 ? (afterDiscount / minQty) : null,
             loyaltyLabel: afterDiscount > 0 ? loyalty.name : null,
           });
@@ -536,6 +443,8 @@ function App() {
           totalItemsNeeded -= take;
         }
         
+        // FIX 1a: afterDiscount is the total price for one SET of minQty items
+        // e.g., 8 items for 10.95 total = afterDiscount * actualSets (not * totalItemsConsumed)
         const newTotal = afterDiscount > 0 ? afterDiscount * actualSets : sectionGross - (fixedDiscount * actualSets);
         const totalDiscountAmt = Math.max(0, sectionGross - newTotal);
         const discountPct = sectionGross > 0 ? Math.round((totalDiscountAmt / sectionGross) * 10000) / 100 : 0;
@@ -555,6 +464,7 @@ function App() {
           loyaltyName: loyalty.name,
           type: 0,
           discountPercent: discountPct,
+          // FIX 1b: afterDiscount per set, not per item
           afterDiscount: afterDiscount > 0 ? afterDiscount * actualSets : 0,
           triggerItems: sectionTriggerItems,
           rewardItems: sectionRewardItems,
@@ -605,6 +515,7 @@ function App() {
         const rewardQtyPerSet = loyalty.rewardQuantity || 1;
         const afterDiscount = loyalty.afterDiscount;
         
+        // Determine if trigger and reward lists are truly different
         const triggerSet = new Set(triggerBarcodes);
         const rewardSet = new Set(rewardBarcodes);
         const listsAreDifferent = triggerBarcodes.length !== rewardBarcodes.length ||
@@ -615,6 +526,7 @@ function App() {
         let realRewardBarcodes = [...rewardBarcodes];
         let hasDistinctRewards = false;
         
+        // Debug: show what IDs resolved to what barcodes
         const rawTriggerIds = (loyalty.triggerProductIds || loyalty.trigger_product_ids || '').toString();
         const rawRewardIds = (loyalty.rewardProductIds || loyalty.reward_product_ids || '').toString();
         console.log('[BOGO] Program:', loyalty.name, 
@@ -628,6 +540,8 @@ function App() {
         if (listsAreDifferent) {
           hasDistinctRewards = true;
         } else if (afterDiscount > 0) {
+          // Legacy fallback: trigger and reward lists are the same,
+          // use after_discount price to identify the real trigger product
           const productPriceMap = {};
           products.forEach(p => { if (p.barcode) productPriceMap[p.barcode] = p.price; });
           Object.keys(cartMap).forEach(bc => { if (!productPriceMap[bc]) productPriceMap[bc] = cartMap[bc].price; });
@@ -650,6 +564,7 @@ function App() {
         }
         
         if (hasDistinctRewards) {
+          // DIFFERENT PRODUCT BOGO: buy trigger, get reward FREE
           for (const tb of realTriggerBarcodes) {
             const triggerItem = cartMap[tb];
             if (!triggerItem) continue;
@@ -690,6 +605,7 @@ function App() {
             if (foundMatch) break;
           }
         } else {
+          // SAME PRODUCT BOGO (e.g., buy 2 get 1 free of same item)
           for (const tb of triggerBarcodes) {
             const triggerItem = cartMap[tb];
             if (!triggerItem) continue;
@@ -701,6 +617,7 @@ function App() {
               if (!rewardItem) continue;
               
               if (tb === rb) {
+                // Same product: need minQty + rewardQty total
                 const totalPerSet = minQty + rewardQtyPerSet;
                 const totalAvail = triggerItem.quantity - (consumed[tb] || 0);
                 if (totalAvail < totalPerSet) continue;
@@ -723,6 +640,7 @@ function App() {
                 foundMatch = true;
                 break;
               } else {
+                // Different product in same list (shouldn't happen with fixed sync, but just in case)
                 const triggerAvail = triggerItem.quantity - (consumed[tb] || 0);
                 if (triggerAvail < minQty) continue;
                 const availReward = rewardItem.quantity - (consumed[rb] || 0);
@@ -895,7 +813,7 @@ function App() {
         totalAmount: totals.total, 
         discountAmount: totals.totalDiscount,
         paymentMethod: method, 
-        cashierName: cashierName, 
+        cashierName: session.cashierName, 
         createdAt: new Date().toISOString(), 
         amountPaid: totals.total, 
         change: 0
@@ -929,31 +847,6 @@ function App() {
     }
   };
 
-  // NEW: Check permissions
-  const canAccessSales = () => currentEmployee && (currentEmployee.saleUser || currentEmployee.managerUser);
-  const canAccessReturns = () => currentEmployee && (currentEmployee.returnUser || currentEmployee.managerUser);
-
-  // === RENDER LOGIC ===
-
-  // 1. Login Screen
-  if (!currentEmployee) {
-    return <Login onLogin={handleLogin} />;
-  }
-
-  // 2. Manager Dashboard (when manager has no session open)
-  if (currentEmployee.managerUser && !session) {
-    return (
-      <ManagerDashboard
-        employee={currentEmployee}
-        companyInfo={companyInfo}
-        onLogout={handleLogout}
-        onSelectSession={handleSelectSession}
-        onOpenNewSession={handleOpenNewSession}
-      />
-    );
-  }
-
-  // 3. Regular Employee - Must Open Session
   if (!session) {
     return (
       <div style={styles.app}>
@@ -962,14 +855,13 @@ function App() {
           <div style={{ maxWidth: '400px', margin: '50px auto' }}>
             <div style={styles.panel}>
               <h2 style={{ textAlign: 'center', marginBottom: '30px' }}>Open Session</h2>
-              <div style={styles.infoBox}><strong>ℹ️ Note:</strong> Opening a new POS session for {currentEmployee.name}</div>
-              <input type="number" placeholder="Opening Cash (Optional)" value={openingCash} onChange={e => setOpeningCash(e.target.value)}
+              <div style={styles.infoBox}><strong>ℹ️ Note:</strong> If you already have an open session, you'll continue with it automatically.</div>
+              <input type="text" placeholder="Cashier Name" value={cashierName} onChange={e => setCashierName(e.target.value)}
                 onKeyPress={e => e.key === 'Enter' && handleOpenSession()} style={styles.input} autoFocus />
+              <input type="number" placeholder="Opening Cash (Optional)" value={openingCash} onChange={e => setOpeningCash(e.target.value)}
+                onKeyPress={e => e.key === 'Enter' && handleOpenSession()} style={styles.input} />
               <button onClick={handleOpenSession} disabled={loading} style={{ ...styles.button, ...styles.primaryBtn, width: '100%' }}>
-                {loading ? 'Opening...' : 'Open Session / فتح الجلسة'}
-              </button>
-              <button onClick={handleLogout} style={{ ...styles.button, ...styles.dangerBtn, width: '100%', marginTop: '10px' }}>
-                Logout / تسجيل الخروج
+                {loading ? 'Checking...' : 'Continue'}
               </button>
             </div>
           </div>
@@ -979,116 +871,56 @@ function App() {
     );
   }
 
-  // 4. PRESERVED: COMPLETE ORIGINAL POS INTERFACE (EXACT SAME UI)
   return (
     <div style={styles.app}>
       <header style={styles.header}>
         <div style={styles.logo}>🏪 {companyInfo.companyNameEn} POS</div>
         <div style={styles.sessionInfo}>
-          <span style={styles.badge}>👤 {cashierName}</span>
-          {isExistingSession && <span style={styles.badgeWarning}>🔄 جلسة مستمرة</span>}
-          {/* Only managers can see total sales */}
-          {currentEmployee.managerUser && <span style={styles.badge}>💰 {fc(session.totalSales)}</span>}
-          {currentEmployee.managerUser && (
-            <button onClick={handleCloseSession} style={{ ...styles.button, ...styles.dangerBtn }}>
-              إغلاق الجلسة
-            </button>
-          )}
-          <button onClick={handleLogout} style={{ ...styles.button, ...styles.dangerBtn }}>تسجيل الخروج</button>
+          <span style={styles.badge}>👤 {session.cashierName}</span>
+          {isExistingSession && <span style={styles.badgeWarning}>🔄 Continuing Session</span>}
+          <span style={styles.badge}>💰 {fc(session.totalSales)}</span>
+          <button onClick={handleCloseSession} style={{ ...styles.button, ...styles.dangerBtn }}>Close Session</button>
         </div>
       </header>
 
       <main style={styles.main}>
         <div style={styles.posTypeSelector}>
-          <div 
-            style={{ 
-              ...styles.posTypeTab, 
-              ...(posType === 'sale' ? styles.posTypeTabActive : {}),
-              ...(!canAccessSales() ? styles.posTypeTabDisabled : {})
-            }} 
-            onClick={() => canAccessSales() && setPosType('sale')}>
-            🛒 نقطة البيع
-          </div>
-          <div 
-            style={{ 
-              ...styles.posTypeTab, 
-              ...(posType === 'return' ? styles.posTypeTabActive : {}),
-              ...(!canAccessReturns() ? styles.posTypeTabDisabled : {})
-            }} 
-            onClick={() => canAccessReturns() && setPosType('return')}>
-            ↩️ المرتجعات
-          </div>
+          <div style={{ ...styles.posTypeTab, ...(posType === 'sale' ? styles.posTypeTabActive : {}) }} onClick={() => setPosType('sale')}>🛒 Sale POS</div>
+          <div style={{ ...styles.posTypeTab, ...(posType === 'return' ? styles.posTypeTabActive : {}) }} onClick={() => setPosType('return')}>↩️ Return POS</div>
         </div>
 
-        {!canAccessSales() && posType === 'sale' && (
-          <div style={styles.warningBox}>⚠️ ليس لديك صلاحية للوصول إلى المبيعات. اتصل بالمدير.</div>
-        )}
-
-        {!canAccessReturns() && posType === 'return' && (
-          <div style={styles.warningBox}>⚠️ ليس لديك صلاحية للوصول إلى المرتجعات. اتصل بالمدير.</div>
-        )}
-
-        {posType === 'return' && canAccessReturns() ? (
+        {posType === 'return' ? (
           <ReturnPOS session={session} companyInfo={companyInfo} showMessage={showMessage} />
-        ) : posType === 'sale' && canAccessSales() ? (
+        ) : (
           <>
             <div style={styles.tabs}>
               {['pos', 'products', 'import'].map(tab => (
                 <button key={tab} onClick={() => setActiveTab(tab)} style={{ ...styles.tab, ...(activeTab === tab ? styles.tabActive : {}) }}>
-                  {tab === 'pos' ? '🛒 نقطة البيع' : tab === 'products' ? '📦 المنتجات' : '📤 استيراد'}
+                  {tab === 'pos' ? '🛒 POS' : tab === 'products' ? '📦 Products' : '📤 Import'}
                 </button>
               ))}
-              <button onClick={handleRefreshData} style={styles.refreshBtn} disabled={loading}>🔄 تحديث البيانات</button>
-              
-              {/* Customer Display Button - Opens in new window/screen fullscreen */}
-              <button 
-                onClick={() => {
-                  if (customerDisplayWindow && !customerDisplayWindow.closed) {
-                    customerDisplayWindow.focus();
-                  } else {
-                    // Open in new window with fullscreen options
-                    const displayWindow = window.open(
-                      '/customer-display', 
-                      'CustomerDisplay',
-                      'width=' + screen.width + ',height=' + screen.height + ',fullscreen=yes,location=no,menubar=no,toolbar=no,status=no'
-                    );
-                    
-                    if (displayWindow) {
-                      // Try to make it fullscreen
-                      try {
-                        displayWindow.moveTo(0, 0);
-                        displayWindow.resizeTo(screen.width, screen.height);
-                      } catch (e) {
-                        console.log('Could not resize window:', e);
-                      }
-                      setCustomerDisplayWindow(displayWindow);
-                    }
-                  }
-                }}
-                style={{ ...styles.button, ...styles.primaryBtn, marginLeft: 'auto' }}>
-                📺 شاشة العميل
-              </button>
+              <button onClick={handleRefreshData} style={styles.refreshBtn} disabled={loading}>🔄 Refresh Data</button>
             </div>
 
             {activeTab === 'pos' && (
               <div style={styles.posLayout}>
                 <div style={styles.panel}>
-                  <input style={styles.input} placeholder="امسح الباركود أو أدخل رمز المنتج..." value={barcode} onChange={e => setBarcode(e.target.value)} onKeyPress={e => e.key === 'Enter' && handleAddByBarcode()} autoFocus />
+                  <input style={styles.input} placeholder="Scan barcode or enter product code..." value={barcode} onChange={e => setBarcode(e.target.value)} onKeyPress={e => e.key === 'Enter' && handleAddByBarcode()} autoFocus />
                   <div style={{ textAlign: 'center', padding: '40px', color: '#999' }}>
                     <div style={{ fontSize: '64px', marginBottom: '15px' }}>🔍</div>
-                    <p style={{ fontSize: '16px', marginBottom: '5px', fontWeight: 'bold' }}>امسح أو أدخل الباركود</p>
-                    <p style={{ fontSize: '13px', color: '#bbb' }}>محسّن لـ {products.length.toLocaleString()} منتج</p>
+                    <p style={{ fontSize: '16px', marginBottom: '5px', fontWeight: 'bold' }}>Scan or Enter Barcode</p>
+                    <p style={{ fontSize: '13px', color: '#bbb' }}>Optimized for {products.length.toLocaleString()} products</p>
                   </div>
                 </div>
 
                 <div style={styles.panel}>
                   <h3 style={{ marginBottom: '20px', display: 'flex', justifyContent: 'space-between' }}>
-                    <span>سلة التسوق</span>
-                    {cart.length > 0 && <span style={{ ...styles.badge, background: '#2563eb' }}>{cart.length} عناصر</span>}
+                    <span>Shopping Cart</span>
+                    {cart.length > 0 && <span style={{ ...styles.badge, background: '#2563eb' }}>{cart.length} items</span>}
                   </h3>
 
                   {cart.length === 0 ? (
-                    <div style={{ textAlign: 'center', padding: '40px', color: '#999' }}><p>السلة فارغة</p></div>
+                    <div style={{ textAlign: 'center', padding: '40px', color: '#999' }}><p>Cart is empty</p></div>
                   ) : (
                     <>
                       <div style={{ maxHeight: '450px', overflowY: 'auto' }}>
@@ -1100,16 +932,23 @@ function App() {
                                 <button style={{ ...styles.qtyBtn, width: '24px', height: '24px', fontSize: '14px' }} onClick={() => updateQuantity(item.barcode, -1)}>−</button>
                                 <span style={{ minWidth: '20px', textAlign: 'center', fontWeight: 'bold' }}>{item.quantity}</span>
                                 <button style={{ ...styles.qtyBtn, width: '24px', height: '24px', fontSize: '14px' }} onClick={() => updateQuantity(item.barcode, 1)}>+</button>
-                                <button style={{ background: 'transparent', border: 'none', color: '#dc3545', cursor: 'pointer', fontSize: '11px', padding: '2px 5px' }} onClick={() => removeFromCart(item.barcode)}>حذف</button>
+                                <button style={{ background: 'transparent', border: 'none', color: '#dc3545', cursor: 'pointer', fontSize: '11px', padding: '2px 5px' }} onClick={() => removeFromCart(item.barcode)}>Remove</button>
                               </div>
                             </div>
                           ))}
                         </div>
 
                         {hasUnresolvedConflicts() && (
-                          <div style={{ background: 'rgba(255, 193, 7, 0.2)', border: '2px solid #ffc107', borderRadius: '10px', padding: '12px', marginBottom: '10px', textAlign: 'center' }}>
-                            <div style={{ fontWeight: 'bold', color: '#856404', marginBottom: '5px' }}>⚠️ إجراء مطلوب</div>
-                            <div style={{ fontSize: '12px', color: '#856404' }}>عروض ترويجية متعددة للمنتجات المجانية - يرجى اختيار واحد</div>
+                          <div style={{ 
+                            background: 'rgba(255, 193, 7, 0.2)', 
+                            border: '2px solid #ffc107', 
+                            borderRadius: '10px', 
+                            padding: '12px', 
+                            marginBottom: '10px',
+                            textAlign: 'center'
+                          }}>
+                            <div style={{ fontWeight: 'bold', color: '#856404', marginBottom: '5px' }}>⚠️ Action Required</div>
+                            <div style={{ fontSize: '12px', color: '#856404' }}>Multiple FREE item promotions - please select one</div>
                           </div>
                         )}
 
@@ -1148,7 +987,7 @@ function App() {
 
                           {totals.remainingItems.length > 0 && (
                             <div style={{ marginBottom: '10px', paddingBottom: '8px', borderBottom: '1px dashed #bbb' }}>
-                              {totals.sections.length > 0 && <div style={{ fontWeight: 'bold', fontSize: '13px', color: '#333', marginBottom: '4px' }}>عناصر أخرى</div>}
+                              {totals.sections.length > 0 && <div style={{ fontWeight: 'bold', fontSize: '13px', color: '#333', marginBottom: '4px' }}>Other Items</div>}
                               {totals.remainingItems.map((item, idx) => (
                                 <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', padding: '2px 8px', fontSize: '12px', color: '#333' }}>
                                   <span>{item.name} x {item.quantity}</span><span>{fc(item.itemSubtotal)}</span>
@@ -1161,33 +1000,45 @@ function App() {
 
                       <div style={{ borderTop: '2px solid #333', paddingTop: '10px', marginTop: '8px' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px', fontSize: '14px' }}>
-                          <span>المجموع الفرعي</span><span>{fc(totals.subtotal)}</span>
+                          <span>Subtotal</span><span>{fc(totals.subtotal)}</span>
                         </div>
                         {totals.totalDiscount > 0 && (
                           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px', fontSize: '14px', color: '#333' }}>
-                            <span>الخصم</span><span>{fcNeg(totals.totalDiscount)}</span>
+                            <span>Discount</span><span>{fcNeg(totals.totalDiscount)}</span>
                           </div>
                         )}
                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px', fontSize: '14px', color: '#666' }}>
-                          <span>الضريبة</span><span>{fc(totals.totalTax)}</span>
+                          <span>Tax</span><span>{fc(totals.totalTax)}</span>
                         </div>
                         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '20px', fontWeight: 'bold', color: '#2563eb', paddingTop: '8px', borderTop: '2px solid #333' }}>
-                          <span>الإجمالي</span><span>{fc(totals.total)}</span>
+                          <span>Total</span><span>{fc(totals.total)}</span>
                         </div>
                       </div>
 
                       <button
-                        style={{ ...styles.button, ...styles.primaryBtn, width: '100%', marginTop: '15px', padding: '15px', fontSize: '16px', 
-                          ...(hasUnresolvedConflicts() ? { background: '#ffc107', color: '#000' } : {}) }}
+                        style={{ 
+                          ...styles.button, 
+                          ...styles.primaryBtn, 
+                          width: '100%', 
+                          marginTop: '15px', 
+                          padding: '15px', 
+                          fontSize: '16px', 
+                          ...(hasUnresolvedConflicts() ? { background: '#ffc107', color: '#000' } : {}) 
+                        }}
                         onClick={() => {
                           if (hasUnresolvedConflicts()) { 
                             const c = detectConflicts(cart); 
-                            for (const x of c) { if (!selectionsRef.current[x.conflictKey]) { setShowConflictModal(x); return; } } 
+                            for (const x of c) { 
+                              if (!selectionsRef.current[x.conflictKey]) { 
+                                setShowConflictModal(x); 
+                                return; 
+                              } 
+                            } 
                           }
                           else handleCheckout();
                         }} 
                         disabled={loading}>
-                        {hasUnresolvedConflicts() ? '⚠️ اختر المنتج المجاني أولاً' : 'المتابعة للدفع'}
+                        {hasUnresolvedConflicts() ? '⚠️ Select FREE Item First' : 'Proceed to Payment'}
                       </button>
                     </>
                   )}
@@ -1197,14 +1048,14 @@ function App() {
 
             {activeTab === 'products' && (
               <div style={styles.panel}>
-                <h3 style={{ marginBottom: '20px' }}>المنتجات ({products.length.toLocaleString()})</h3>
+                <h3 style={{ marginBottom: '20px' }}>Products ({products.length.toLocaleString()})</h3>
                 <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                   <thead><tr style={{ background: '#f8f9fa' }}>
-                    <th style={{ padding: '12px', textAlign: 'left', borderBottom: '2px solid #e0e0e0' }}>الباركود</th>
-                    <th style={{ padding: '12px', textAlign: 'left', borderBottom: '2px solid #e0e0e0' }}>الاسم</th>
-                    <th style={{ padding: '12px', textAlign: 'left', borderBottom: '2px solid #e0e0e0' }}>الفئة</th>
-                    <th style={{ padding: '12px', textAlign: 'right', borderBottom: '2px solid #e0e0e0' }}>السعر</th>
-                    <th style={{ padding: '12px', textAlign: 'right', borderBottom: '2px solid #e0e0e0' }}>الضريبة</th>
+                    <th style={{ padding: '12px', textAlign: 'left', borderBottom: '2px solid #e0e0e0' }}>Barcode</th>
+                    <th style={{ padding: '12px', textAlign: 'left', borderBottom: '2px solid #e0e0e0' }}>Name</th>
+                    <th style={{ padding: '12px', textAlign: 'left', borderBottom: '2px solid #e0e0e0' }}>Category</th>
+                    <th style={{ padding: '12px', textAlign: 'right', borderBottom: '2px solid #e0e0e0' }}>Price</th>
+                    <th style={{ padding: '12px', textAlign: 'right', borderBottom: '2px solid #e0e0e0' }}>Tax</th>
                   </tr></thead>
                   <tbody>
                     {products.slice(0, 100).map(p => (
@@ -1219,7 +1070,7 @@ function App() {
                     {products.length > 100 && (
                       <tr>
                         <td colSpan="5" style={{ padding: '20px', textAlign: 'center', color: '#999', fontStyle: 'italic' }}>
-                          عرض أول 100 منتج. استخدم ماسح الباركود للعثور على منتجات محددة.
+                          Showing first 100 products. Use barcode scanner to find specific products.
                         </td>
                       </tr>
                     )}
@@ -1230,49 +1081,78 @@ function App() {
 
             {activeTab === 'import' && (
               <div style={styles.panel}>
-                <h3 style={{ marginBottom: '20px' }}>استيراد البيانات من Excel</h3>
+                <h3 style={{ marginBottom: '20px' }}>Import Data from Excel</h3>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
-                  {[{ type: 'products', label: 'استيراد المنتجات' }, { type: 'loyalty', label: 'استيراد برامج الولاء' }].map(({ type, label }) => (
+                  {[{ type: 'products', label: 'Import Products' }, { type: 'loyalty', label: 'Import Loyalty Programs' }].map(({ type, label }) => (
                     <div key={type} style={{ padding: '30px', border: '2px dashed #e0e0e0', borderRadius: '15px', textAlign: 'center' }}>
                       <h4>{label}</h4>
-                      <p style={{ color: '#666', marginBottom: '15px' }}>{type === 'loyalty' ? 'تحميل ملف CSV أو Excel (.csv, .xlsx)' : 'تحميل ملف Excel (.xlsx)'}</p>
+                      <p style={{ color: '#666', marginBottom: '15px' }}>{type === 'loyalty' ? 'Upload CSV or Excel file (.csv, .xlsx)' : 'Upload Excel file (.xlsx)'}</p>
                       <input type="file" accept={type === 'loyalty' ? '.xlsx,.xls,.csv' : '.xlsx,.xls'} onChange={e => e.target.files[0] && handleFileImport(type, e.target.files[0])} style={{ display: 'none' }} id={`${type}File`} />
-                      <label htmlFor={`${type}File`} style={{ ...styles.button, ...styles.primaryBtn, cursor: 'pointer', display: 'inline-block' }}>اختر ملف</label>
+                      <label htmlFor={`${type}File`} style={{ ...styles.button, ...styles.primaryBtn, cursor: 'pointer', display: 'inline-block' }}>Select File</label>
                     </div>
                   ))}
                 </div>
               </div>
             )}
           </>
-        ) : null}
+        )}
       </main>
 
       {showCustomerInfo && (
         <div style={styles.modal} onClick={() => setShowCustomerInfo(false)}>
           <div style={styles.modalContent} onClick={e => e.stopPropagation()}>
             <h2 style={{ textAlign: 'center', marginBottom: '10px' }}>Customer Information</h2>
-            <p style={{ textAlign: 'center', color: '#666', fontSize: '14px', marginBottom: '20px' }}>معلومات العميل / Required</p>
+            <p style={{ textAlign: 'center', color: '#666', fontSize: '14px', marginBottom: '20px' }}>
+              معلومات العميل / Required
+            </p>
 
             <div style={styles.phoneInputContainer}>
               <div style={styles.phonePrefix}>+966</div>
-              <input type="tel" placeholder="5XXXXXXXX (Required / مطلوب) *" value={customerInfo.phone}
+              <input
+                type="tel"
+                placeholder="5XXXXXXXX (Required / مطلوب) *"
+                value={customerInfo.phone}
                 onChange={e => {
                   const value = e.target.value.replace(/\D/g, '').slice(0, 9);
                   setCustomerInfo({ ...customerInfo, phone: value });
-                  if (value && validationErrors.phone) { setValidationErrors({ ...validationErrors, phone: '' }); }
+                  if (value && validationErrors.phone) {
+                    setValidationErrors({ ...validationErrors, phone: '' });
+                  }
                 }}
-                style={{ ...styles.input, marginBottom: 0, flex: 1, ...(validationErrors.phone ? styles.inputError : {}) }}
-                maxLength={9} autoFocus />
+                style={{
+                  ...styles.input,
+                  marginBottom: 0,
+                  flex: 1,
+                  ...(validationErrors.phone ? styles.inputError : {})
+                }}
+                maxLength={9}
+                autoFocus
+              />
             </div>
-            {validationErrors.phone && <div style={styles.errorText}>⚠️ {validationErrors.phone}</div>}
+            {validationErrors.phone && (
+              <div style={styles.errorText}>⚠️ {validationErrors.phone}</div>
+            )}
 
-            <div style={styles.checkboxContainer}
+            <div
+              style={styles.checkboxContainer}
               onClick={() => {
                 const newNeedsVat = !customerInfo.needsVat;
-                setCustomerInfo({ ...customerInfo, needsVat: newNeedsVat, vat: newNeedsVat ? customerInfo.vat : '' });
-                if (!newNeedsVat) { setValidationErrors({ ...validationErrors, vat: '' }); }
-              }}>
-              <input type="checkbox" checked={customerInfo.needsVat} onChange={() => {}} style={styles.checkbox} />
+                setCustomerInfo({ 
+                  ...customerInfo, 
+                  needsVat: newNeedsVat,
+                  vat: newNeedsVat ? customerInfo.vat : ''
+                });
+                if (!newNeedsVat) {
+                  setValidationErrors({ ...validationErrors, vat: '' });
+                }
+              }}
+            >
+              <input
+                type="checkbox"
+                checked={customerInfo.needsVat}
+                onChange={() => {}}
+                style={styles.checkbox}
+              />
               <label style={{ cursor: 'pointer', fontSize: '14px', fontWeight: 'bold' }}>
                 🧾 Request Tax Invoice (VAT) / طلب فاتورة ضريبية
               </label>
@@ -1280,24 +1160,57 @@ function App() {
 
             {customerInfo.needsVat && (
               <>
-                <input type="text" placeholder="VAT Number - 15 digits / الرقم الضريبي (15 رقم) *" value={customerInfo.vat}
+                <input
+                  type="text"
+                  placeholder="VAT Number - 15 digits / الرقم الضريبي (15 رقم) *"
+                  value={customerInfo.vat}
                   onChange={e => {
                     const value = e.target.value.replace(/\D/g, '').slice(0, 15);
                     setCustomerInfo({ ...customerInfo, vat: value });
-                    if (value && validationErrors.vat) { setValidationErrors({ ...validationErrors, vat: '' }); }
+                    if (value && validationErrors.vat) {
+                      setValidationErrors({ ...validationErrors, vat: '' });
+                    }
                   }}
-                  style={{ ...styles.input, ...(validationErrors.vat ? styles.inputError : {}) }} maxLength={15} />
-                {validationErrors.vat && <div style={styles.errorText}>⚠️ {validationErrors.vat}</div>}
-                <div style={{ background: '#e3f2fd', border: '1px solid #2196f3', borderRadius: '8px', padding: '12px', marginBottom: '15px', fontSize: '12px', color: '#1565c0' }}>
-                  <strong>ℹ️ Note:</strong> Tax Invoice requires valid 15-digit Saudi VAT number<br />
+                  style={{
+                    ...styles.input,
+                    ...(validationErrors.vat ? styles.inputError : {})
+                  }}
+                  maxLength={15}
+                />
+                {validationErrors.vat && (
+                  <div style={styles.errorText}>⚠️ {validationErrors.vat}</div>
+                )}
+                <div style={{ 
+                  background: '#e3f2fd', 
+                  border: '1px solid #2196f3', 
+                  borderRadius: '8px', 
+                  padding: '12px', 
+                  marginBottom: '15px', 
+                  fontSize: '12px', 
+                  color: '#1565c0' 
+                }}>
+                  <strong>ℹ️ Note:</strong> Tax Invoice requires valid 15-digit Saudi VAT number
+                  <br />
                   <strong>ملاحظة:</strong> الفاتورة الضريبية تتطلب رقم ضريبي سعودي صحيح من 15 رقم
                 </div>
               </>
             )}
 
             <div style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
-              <button onClick={() => setShowCustomerInfo(false)} style={{ ...styles.button, flex: 1, background: '#6c757d', color: '#fff' }}>Cancel / إلغاء</button>
-              <button onClick={proceedToPayment} style={{ ...styles.button, ...styles.primaryBtn, flex: 1 }}>Continue / متابعة</button>
+              <button
+                onClick={() => {
+                  setShowCustomerInfo(false);
+                }}
+                style={{ ...styles.button, flex: 1, background: '#6c757d', color: '#fff' }}
+              >
+                Cancel / إلغاء
+              </button>
+              <button
+                onClick={proceedToPayment}
+                style={{ ...styles.button, ...styles.primaryBtn, flex: 1 }}
+              >
+                Continue / متابعة
+              </button>
             </div>
           </div>
         </div>
@@ -1306,16 +1219,16 @@ function App() {
       {showPayment && (
         <div style={styles.modal} onClick={() => setShowPayment(false)}>
           <div style={styles.modalContent} onClick={e => e.stopPropagation()}>
-            <h2 style={{ textAlign: 'center', marginBottom: '10px' }}>إتمام الدفع</h2>
+            <h2 style={{ textAlign: 'center', marginBottom: '10px' }}>Complete Payment</h2>
             <div style={{ textAlign: 'center', fontSize: '36px', fontWeight: 'bold', color: '#2563eb', marginBottom: '25px' }}>{fc(totals.total)}</div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '20px' }}>
               <button style={{ padding: '25px', borderRadius: '15px', border: '2px solid #e0e0e0', background: '#fff', cursor: 'pointer', fontSize: '18px', fontWeight: 'bold' }}
-                onClick={() => handlePayment('CASH')} disabled={loading}>💵 نقدي</button>
+                onClick={() => handlePayment('CASH')} disabled={loading}>💵 Cash</button>
               <button style={{ padding: '25px', borderRadius: '15px', border: '2px solid #e0e0e0', background: '#fff', cursor: 'pointer', fontSize: '18px', fontWeight: 'bold' }}
-                onClick={() => handlePayment('CARD')} disabled={loading}>💳 بطاقة</button>
+                onClick={() => handlePayment('CARD')} disabled={loading}>💳 Card</button>
             </div>
             <button style={{ width: '100%', padding: '15px', borderRadius: '10px', border: '1px solid #e0e0e0', background: '#fff', cursor: 'pointer' }}
-              onClick={() => setShowPayment(false)}>إلغاء</button>
+              onClick={() => setShowPayment(false)}>Cancel</button>
           </div>
         </div>
       )}
@@ -1323,11 +1236,11 @@ function App() {
       {showConflictModal && (
         <div style={styles.modal}>
           <div style={styles.modalContent} onClick={e => e.stopPropagation()}>
-            <h3 style={{ textAlign: 'center', marginBottom: '10px', color: '#333', fontSize: '22px' }}>🎁 اختر المنتج المجاني</h3>
+            <h3 style={{ textAlign: 'center', marginBottom: '10px', color: '#333', fontSize: '22px' }}>🎁 Choose FREE Item</h3>
             <p style={{ textAlign: 'center', color: '#666', marginBottom: '8px', fontSize: '14px' }}>
-              عروض ترويجية متعددة للمنتجات المجانية لـ <strong>{showConflictModal.triggerProduct}</strong>
+              Multiple FREE item promotions for <strong>{showConflictModal.triggerProduct}</strong>
             </p>
-            <p style={{ textAlign: 'center', color: '#999', marginBottom: '20px', fontSize: '12px' }}>اختر المنتج الذي تريد الحصول عليه مجاناً:</p>
+            <p style={{ textAlign: 'center', color: '#999', marginBottom: '20px', fontSize: '12px' }}>اختر المنتج المجاني / Select which item to get FREE:</p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '15px' }}>
               {showConflictModal.options.map(opt => (
                 <button key={opt.loyaltyId}
@@ -1338,16 +1251,16 @@ function App() {
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
                     <div style={{ flex: 1 }}>
                       <div style={{ fontWeight: 'bold', fontSize: '15px', color: '#333', marginBottom: '4px' }}>🎁 {opt.loyaltyName}</div>
-                      <div style={{ fontSize: '13px', color: '#28a745', marginBottom: '6px', fontWeight: 'bold' }}>احصل مجاناً على: {opt.rewardProducts.map(rp => rp.name).join(', ')}</div>
-                      <div style={{ fontSize: '12px', color: '#888' }}>القيمة: {opt.rewardProducts.map(rp => fc(rp.price)).join(', ')}</div>
+                      <div style={{ fontSize: '13px', color: '#28a745', marginBottom: '6px', fontWeight: 'bold' }}>Get FREE: {opt.rewardProducts.map(rp => rp.name).join(', ')}</div>
+                      <div style={{ fontSize: '12px', color: '#888' }}>Value: {opt.rewardProducts.map(rp => fc(rp.price)).join(', ')}</div>
                     </div>
                     <div style={{ textAlign: 'right', marginLeft: '15px' }}>
-                      <div style={{ fontSize: '11px', color: '#888', marginBottom: '3px' }}>توفر</div>
+                      <div style={{ fontSize: '11px', color: '#888', marginBottom: '3px' }}>You Save</div>
                       <div style={{ fontSize: '18px', fontWeight: 'bold', color: '#28a745' }}>{fc(opt.potentialSavings)}</div>
                     </div>
                   </div>
                   <div style={{ marginTop: '8px', paddingTop: '8px', borderTop: '1px dashed #e0e0e0', textAlign: 'center', fontSize: '13px', fontWeight: 'bold', color: '#28a745' }}>
-                    ← اضغط للاختيار
+                    ← Click to Select / اضغط للاختيار
                   </div>
                 </button>
               ))}

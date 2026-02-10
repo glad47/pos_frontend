@@ -1,9 +1,9 @@
 import axios from 'axios';
 
-const API_URL = '/api';
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080/api';
 
 const api = axios.create({
-  baseURL: API_URL,
+  baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -15,61 +15,51 @@ export const productApi = {
   create: (product) => api.post('/products', product),
   update: (id, product) => api.put(`/products/${id}`, product),
   delete: (id) => api.delete(`/products/${id}`),
-  importExcel: (file) => {
-    const formData = new FormData();
-    formData.append('file', file);
-    return api.post('/products/import', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    });
-  },
+  uploadCsv: (formData) => api.post('/products/upload', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  }),
 };
 
 export const loyaltyApi = {
   getAll: () => api.get('/loyalty'),
   getActive: () => api.get('/loyalty/active'),
+  getById: (id) => api.get(`/loyalty/${id}`),
   create: (loyalty) => api.post('/loyalty', loyalty),
   update: (id, loyalty) => api.put(`/loyalty/${id}`, loyalty),
   delete: (id) => api.delete(`/loyalty/${id}`),
-  importExcel: (file) => {
-    const formData = new FormData();
-    formData.append('file', file);
-    return api.post('/loyalty/import', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    });
-  },
+  uploadCsv: (formData) => api.post('/loyalty/upload', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  }),
 };
 
 export const sessionApi = {
-  // Open session (will return existing active session if found)
-  open: (data) => api.post('/sessions/open', data),
-  
-  // Close session
-  close: (sessionId, data) => api.post(`/sessions/${sessionId}/close`, data),
-  
-  // Get current session (deprecated - use checkActiveSession instead)
-  getCurrent: () => api.get('/sessions/current'),
-  
-  // Get session by ID
-  getById: (sessionId) => api.get(`/sessions/${sessionId}`),
-  
-  // Check if cashier has active session
-  checkActiveSession: (cashierName) => api.get(`/sessions/check/${encodeURIComponent(cashierName)}`),
-  
-  // Get active session for cashier
-  getActiveSession: (cashierName) => api.get(`/sessions/active/${encodeURIComponent(cashierName)}`),
-  
-  // Get all open sessions
-  getOpenSessions: () => api.get('/sessions/open'),
+  getAll: () => api.get('/sessions'),
+  getOpen: () => api.get('/sessions/open'),
+  getById: (id) => api.get(`/sessions/${id}`),
+  checkActive: (cashierName) => api.get(`/sessions/check/${cashierName}`),
+  getActive: (cashierName) => api.get(`/sessions/active/${cashierName}`),
+  open: (dto) => api.post('/sessions/open', dto),
+  close: (id, dto) => api.post(`/sessions/${id}/close`, dto),
 };
 
 export const orderApi = {
-  create: (sessionId, orderData) => api.post(`/orders/session/${sessionId}`, orderData),
-  getSessionOrders: (sessionId) => api.get(`/orders/session/${sessionId}`),
-  getByNumber: (orderNumber) => api.get(`/orders/number/${orderNumber}`),
-  search: (searchDTO) => api.post('/orders/search', searchDTO),
-  updateSyncStatus: (orderId, synced) => api.put(`/orders/${orderId}/sync?synced=${synced}`),
-  getUnsyncedOrders: () => api.get('/orders/unsynced'),
-  getOrderJson: (orderId) => api.get(`/orders/${orderId}/json`),
+  create: (order) => api.post('/orders', order),
+  getAll: () => api.get('/orders'),
+  getBySessionId: (sessionId) => api.get(`/orders/session/${sessionId}`),
+  search: (criteria) => api.post('/orders/search', criteria),
+  getById: (id) => api.get(`/orders/${id}`),
+};
+
+export const employeeApi = {
+  login: (credentials) => api.post('/employees/login', credentials),
+  getAll: () => api.get('/employees'),
+  getActive: () => api.get('/employees/active'),
+  getById: (id) => api.get(`/employees/${id}`),
+  create: (employee) => api.post('/employees', employee),
+  update: (id, employee) => api.put(`/employees/${id}`, employee),
+  updatePin: (id, pin) => api.put(`/employees/${id}/pin`, { pin }),
+  deactivate: (id) => api.delete(`/employees/${id}`),
+  activate: (id) => api.put(`/employees/${id}/activate`),
 };
 
 export default api;
