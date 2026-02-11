@@ -4,37 +4,55 @@ import ReactDOM from 'react-dom/client';
 const fc = (amount) => `${amount.toFixed(2)} ﷼`;
 const fcNeg = (amount) => `-${amount.toFixed(2)} ﷼`;
 
-const CustomerDisplay = () => {
+const CustomerDisplay = ({ cart: propCart, totals: propTotals, companyInfo: propCompanyInfo }) => {
   const [cartData, setCartData] = useState({
-    cart: [],
-    sections: [],
-    remainingItems: [],
-    subtotal: 0,
-    discount: 0,
-    tax: 0,
-    total: 0,
-    companyName: 'Q POS'
+    cart: propCart || [],
+    sections: propTotals?.sections || [],
+    remainingItems: propTotals?.remainingItems || [],
+    subtotal: propTotals?.subtotal || 0,
+    discount: propTotals?.totalDiscount || 0,
+    tax: propTotals?.totalTax || 0,
+    total: propTotals?.total || 0,
+    companyName: propCompanyInfo?.companyNameEn || 'Q POS'
   });
 
+  // Update when props change
   useEffect(() => {
-    // Listen for messages from parent window
+    setCartData({
+      cart: propCart || [],
+      sections: propTotals?.sections || [],
+      remainingItems: propTotals?.remainingItems || [],
+      subtotal: propTotals?.subtotal || 0,
+      discount: propTotals?.totalDiscount || 0,
+      tax: propTotals?.totalTax || 0,
+      total: propTotals?.total || 0,
+      companyName: propCompanyInfo?.companyNameEn || 'Q POS'
+    });
+  }, [propCart, propTotals, propCompanyInfo]);
+
+  useEffect(() => {
+    // Still listen for postMessage as fallback
     const handleMessage = (event) => {
-      if (event.data && event.data.type === 'UPDATE_CART') {
-        setCartData(event.data.data);
+      if (event.origin !== window.location.origin) return;
+      if (event.data && event.data.type === 'UPDATE_ALL') {
+        const data = event.data.data;
+        setCartData({
+          cart: data.cart || [],
+          sections: data.totals?.sections || [],
+          remainingItems: data.totals?.remainingItems || [],
+          subtotal: data.totals?.subtotal || 0,
+          discount: data.totals?.totalDiscount || 0,
+          tax: data.totals?.totalTax || 0,
+          total: data.totals?.total || 0,
+          companyName: data.companyInfo?.companyNameEn || 'Q POS'
+        });
       }
     };
 
     window.addEventListener('message', handleMessage);
-
-    // Send ready message to parent
-    if (window.opener) {
-      window.opener.postMessage({ type: 'DISPLAY_READY' }, '*');
-    }
-
-    return () => {
-      window.removeEventListener('message', handleMessage);
-    };
+    return () => window.removeEventListener('message', handleMessage);
   }, []);
+
 
   const styles = {
     container: {

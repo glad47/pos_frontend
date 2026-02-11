@@ -56,6 +56,49 @@ const validateSaudiVAT = (vat) => {
   return /^[0-9]{15}$/.test(cleaned);
 };
 
+// NEW: Categories that use dynamic weight-based barcodes
+const WEIGHT_BASED_CATEGORIES = [
+  'قسم البهارات والمكسرات خارجي',
+  'الملحمة',
+  'الخضار والفواكه',
+  'قسم الاجبان خارجي'
+];
+
+// NEW: Parse dynamic barcode and extract weight
+const parseDynamicBarcode = (scannedBarcode) => {
+  // Dynamic barcode format: 7 digits (product code) + 6 digits (weight in grams)
+  if (scannedBarcode.length === 13) {
+    const productCode = scannedBarcode.substring(0, 7);
+    const weightCode = scannedBarcode.substring(7, 13);
+    const weightInKg = parseInt(weightCode, 10) / 10000; // Convert grams to kg
+    
+    return {
+      isDynamic: true,
+      productCode,
+      weightInKg,
+      scannedBarcode
+    };
+  }
+  
+  return {
+    isDynamic: false,
+    productCode: scannedBarcode,
+    weightInKg: 1,
+    scannedBarcode
+  };
+};
+
+// NEW: Find product by base barcode (first 7 digits)
+const findProductByBaseBarcode = (products, baseBarcode) => {
+  return products.find(p => {
+    if (WEIGHT_BASED_CATEGORIES.includes(p.category)) {
+      // For weight-based categories, match first 7 digits
+      return p.barcode && p.barcode.substring(0, 7) === baseBarcode;
+    }
+    return p.barcode === baseBarcode;
+  });
+};
+
 function App() {
   // NEW: Authentication state
   const [currentEmployee, setCurrentEmployee] = useState(null);
@@ -257,20 +300,72 @@ function App() {
     setLoading(false);
   };
 
+  // MODIFIED: Handle dynamic barcodes
   const handleAddByBarcode = async () => {
     if (!barcode.trim()) return;
-    try { 
-      const r = await productApi.getByBarcode(barcode.trim()); 
-      addToCart(r.data); 
-      setBarcode(''); 
+    
+    const scannedBarcode = barcode.trim();
+    const barcodeInfo = parseDynamicBarcode(scannedBarcode);
+    
+    try {
+      let product;
+      
+      if (barcodeInfo.isDynamic) {
+        // Try to find product by base barcode (first 7 digits)
+        product = findProductByBaseBarcode(products, barcodeInfo.productCode);
+        
+        if (!product) {
+          // If not found locally, try API with base barcode
+          try {
+            const response = await productApi.getByBarcode(barcodeInfo.productCode);
+            product = response.data;
+          } catch (apiError) {
+            console.log('Product not found with base barcode, trying full barcode');
+          }
+        }
+        
+        if (product && WEIGHT_BASED_CATEGORIES.includes(product.category)) {
+          // Create a weighted product entry
+          const weightedProduct = {
+            ...product,
+            barcode: scannedBarcode, // Use full scanned barcode as unique identifier
+            baseBarcode: barcodeInfo.productCode, // Store base barcode for reference
+            weight: barcodeInfo.weightInKg,
+            price: product.price * barcodeInfo.weightInKg, // Calculate price based on weight
+            isWeightBased: true,
+            name: `${product.name} (${barcodeInfo.weightInKg.toFixed(3)} كجم)` // Add weight to name
+          };
+          addToCart(weightedProduct);
+          setBarcode('');
+          showMessage(`Added: ${barcodeInfo.weightInKg.toFixed(3)} kg at ${fc(weightedProduct.price)}`);
+          return;
+        }
+      }
+      
+      // Standard barcode lookup
+      if (!product) {
+        const response = await productApi.getByBarcode(scannedBarcode);
+        product = response.data;
+      }
+      
+      addToCart(product);
+      setBarcode('');
+    } catch (e) {
+      console.error('Barcode lookup error:', e);
+      showMessage('Product not found');
     }
-    catch (e) { showMessage('Product not found'); }
   };
 
   const addToCart = (product) => {
     setCart(prev => {
-      const ex = prev.find(i => i.barcode === product.barcode);
-      if (ex) return prev.map(i => i.barcode === product.barcode ? { ...i, quantity: i.quantity + 1 } : i);
+      // For weight-based products, use full barcode as unique identifier
+      const identifier = product.isWeightBased ? product.barcode : product.barcode;
+      const ex = prev.find(i => i.barcode === identifier);
+      
+      if (ex) {
+        // For weight-based items, add quantities (weights will accumulate)
+        return prev.map(i => i.barcode === identifier ? { ...i, quantity: i.quantity + 1 } : i);
+      }
       return [...prev, { ...product, quantity: 1 }];
     });
   };
@@ -284,7 +379,11 @@ function App() {
   // PRESERVED: All original loyalty detection and calculation logic (UNCHANGED)
   const detectConflicts = useCallback((cartItems) => {
     const cartMap = {};
-    cartItems.forEach(item => { cartMap[item.barcode] = item; });
+    cartItems.forEach(item => { 
+      // Use baseBarcode for weight-based items in loyalty matching
+      const lookupBarcode = item.baseBarcode || item.barcode;
+      cartMap[lookupBarcode] = item; 
+    });
     const triggerGroups = {};
 
     const idToBarcode = {};
@@ -438,8 +537,12 @@ function App() {
 
   const calculateLoyaltyBreakdown = useCallback((cartItems) => {
     // PRESERVED: COMPLETE ORIGINAL LOYALTY CALCULATION LOGIC - NOT MODIFIED
+    // NOTE: For weight-based items, we use baseBarcode for loyalty matching
     const cartMap = {};
-    cartItems.forEach(item => { cartMap[item.barcode] = { ...item }; });
+    cartItems.forEach(item => { 
+      const lookupBarcode = item.baseBarcode || item.barcode;
+      cartMap[lookupBarcode] = { ...item }; 
+    });
     const bogoRewardedBarcodes = new Set();
     const currentSel = selectionsRef.current;
 
@@ -758,7 +861,8 @@ function App() {
 
     const remainingItems = [];
     cartItems.forEach(item => {
-      const usedTotal = consumed[item.barcode] || 0;
+      const lookupBarcode = item.baseBarcode || item.barcode;
+      const usedTotal = consumed[lookupBarcode] || 0;
       const remaining = item.quantity - Math.min(item.quantity, usedTotal);
       if (remaining > 0) remainingItems.push({ ...item, quantity: remaining, itemSubtotal: item.price * remaining });
     });
@@ -1042,27 +1146,68 @@ function App() {
               
               {/* Customer Display Button - Opens in new window/screen fullscreen */}
               <button 
-                onClick={() => {
+                onClick={async () => {
                   if (customerDisplayWindow && !customerDisplayWindow.closed) {
                     customerDisplayWindow.focus();
-                  } else {
-                    // Open in new window with fullscreen options
-                    const displayWindow = window.open(
-                      '/customer-display', 
-                      'CustomerDisplay',
-                      'width=' + screen.width + ',height=' + screen.height + ',fullscreen=yes,location=no,menubar=no,toolbar=no,status=no'
-                    );
-                    
-                    if (displayWindow) {
-                      // Try to make it fullscreen
-                      try {
-                        displayWindow.moveTo(0, 0);
-                        displayWindow.resizeTo(screen.width, screen.height);
-                      } catch (e) {
-                        console.log('Could not resize window:', e);
+                    return;
+                  }
+
+                  try {
+                    if ('getScreenDetails' in window) {
+                      const details = await window.getScreenDetails();
+                      const screens = details.screens;
+
+                      if (screens.length > 1) {
+                        const currentX = window.screenX;
+                        const currentY = window.screenY;
+
+                        let currentScreenIndex = 0;
+                        for (let i = 0; i < screens.length; i++) {
+                          const s = screens[i];
+                          if (
+                            currentX >= s.left &&
+                            currentX < s.left + s.width &&
+                            currentY >= s.top &&
+                            currentY < s.top + s.height
+                          ) {
+                            currentScreenIndex = i;
+                            break;
+                          }
+                        }
+
+                        const targetScreenIndex = currentScreenIndex === 0 ? 1 : 0;
+                        const targetScreen = screens[targetScreenIndex];
+
+                        const displayWindow = window.open(
+                          '/customer-display',
+                          'CustomerDisplay',
+                          `width=${targetScreen.width},height=${targetScreen.height},left=${targetScreen.left},top=${targetScreen.top},fullscreen=yes,resizable=no,toolbar=no,menubar=no,scrollbars=no,status=no`
+                        );
+
+                        if (displayWindow) {
+                          setCustomerDisplayWindow(displayWindow);
+                        }
+                        return;
                       }
-                      setCustomerDisplayWindow(displayWindow);
                     }
+                  } catch (err) {
+                    console.warn('getScreenDetails failed, falling back:', err);
+                  }
+
+                  // Fallback: single screen or API not available
+                  const displayWindow = window.open(
+                    '/customer-display',
+                    'CustomerDisplay',
+                    `width=${screen.width},height=${screen.height},fullscreen=yes,location=no,menubar=no,toolbar=no,status=no`
+                  );
+                  if (displayWindow) {
+                    try {
+                      displayWindow.moveTo(0, 0);
+                      displayWindow.resizeTo(screen.width, screen.height);
+                    } catch (e) {
+                      console.log('Could not resize window:', e);
+                    }
+                    setCustomerDisplayWindow(displayWindow);
                   }
                 }}
                 style={{ ...styles.button, ...styles.primaryBtn, marginLeft: 'auto' }}>

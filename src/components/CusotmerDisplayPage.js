@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import CustomerDisplay from './components/CustomerDisplay';
+import CustomerDisplay from './CustomerDisplay';
 
 /**
  * CustomerDisplayPage - Fullscreen customer-facing display
